@@ -19,14 +19,29 @@ export function isLocalStoreDisabled(): boolean {
 }
 
 /**
- * Public base URL used for OAuth/email redirects.
- * Order of precedence: explicit env var > Vercel production > Vercel preview > localhost.
+ * Public base URL used for OAuth/email redirects and Supabase email links.
+ *
+ * Order of precedence:
+ *   1. `NEXT_PUBLIC_SITE_URL` (explicit override, recommended)
+ *   2. `VERCEL_PROJECT_PRODUCTION_URL` (production branch on Vercel)
+ *   3. `NEXT_PUBLIC_VERCEL_URL` (preview/client-exposed build-time var on Vercel)
+ *   4. `VERCEL_URL` (any Vercel deployment, runtime)
+ *   5. `http://localhost:3000` (local dev only)
+ *
+ * On Vercel we refuse to silently fall back to localhost: Supabase uses the URL
+ * we hand it as `emailRedirectTo`. A localhost URL silently sends the magic
+ * link to the user's dev machine. Throwing surfaces the misconfig in logs.
  */
 export function resolveSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return stripTrailingSlash(process.env.NEXT_PUBLIC_SITE_URL);
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   if (process.env.NEXT_PUBLIC_VERCEL_URL) return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.VERCEL === "1") {
+    throw new Error(
+      "resolveSiteUrl: Vercel deployment is missing the public site URL. Set NEXT_PUBLIC_SITE_URL (or VERCEL_PROJECT_PRODUCTION_URL) in the project's environment variables, then redeploy."
+    );
+  }
   return "http://localhost:3000";
 }
 

@@ -24,8 +24,8 @@ const cards = [
 ];
 
 function normalizeProfileName(profile: Profile | { id: string; display_name: string }) {
-  if (profile.id === "local-maxim") return "максимка";
-  if (profile.id === "local-vika") return "вика";
+  // Comes pre-lowered from the Supabase seed and the local profile factory,
+  // so we just pass it through — no more hard-coded special IDs.
   return profile.display_name;
 }
 
@@ -48,12 +48,7 @@ export function HomeClient({
 }) {
   const title = couple?.name ?? "Наше Облачко";
   const days = couple?.anniversary_date ? daysBetween(couple.anniversary_date) : 0;
-  const visibleProfiles = profiles.length
-    ? profiles.map((profile) => ({ ...profile, display_name: normalizeProfileName(profile) }))
-    : [
-        { id: "local-maxim", display_name: "максимка" },
-        { id: "local-vika", display_name: "вика" }
-      ];
+  const visibleProfiles = profiles.map((profile) => ({ ...profile, display_name: normalizeProfileName(profile) }));
 
   const fallbackReason = dailyReason ?? reasonPool[0] ?? { day: 1, text: "За то, что ты есть." };
   const [currentReason, setCurrentReason] = useState<ReasonOption | null>(null);
