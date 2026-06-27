@@ -354,6 +354,17 @@ export async function localListMessages(): Promise<SecretMessage[]> {
   return data.messages.sort((a, b) => a.created_at.localeCompare(b.created_at));
 }
 
+export async function localCountUnreadMessages(userId: string): Promise<number> {
+  const data = await readData();
+  const currentMs = Date.now();
+  return data.messages.filter((message) => {
+    if (message.recipient_id !== userId) return false;
+    if (message.is_read) return false;
+    if (message.reveal_at && new Date(message.reveal_at).getTime() > currentMs) return false;
+    return true;
+  }).length;
+}
+
 export async function localSendMessage(input: { recipientId: string; body: string; revealAt?: string | null }): Promise<SecretMessage> {
   const user = getLocalCurrentUser();
   const revealed = !input.revealAt || new Date(input.revealAt).getTime() <= Date.now();
