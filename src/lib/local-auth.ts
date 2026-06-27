@@ -42,6 +42,10 @@ export function getLocalProfiles() {
     couple_id: "local-couple",
     display_name: displayNameFor(user.login),
     avatar_url: null,
+    // The local demo has hard-coded roles. Real couples would set this in
+    // onboarding; local-store just mirrors the names the user typed in
+    // `.env` (Максим / Вика) so the hug widget grammar matches production.
+    gender: user.login.trim().toLowerCase() === "вика" ? "female" : "male",
     created_at: new Date(0).toISOString(),
     updated_at: new Date(0).toISOString()
   }));

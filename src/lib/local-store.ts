@@ -78,7 +78,9 @@ export function getLocalCouple(): Couple {
 export type LocalHugState = {
   currentUserId: string | null;
   currentName: string | null;
+  currentGender: "male" | "female" | "unspecified" | null;
   partnerName: string | null;
+  partnerGender: "male" | "female" | "unspecified" | null;
   incoming: (LocalHugSignal & { senderName: string }) | null;
   outgoing: (LocalHugSignal & { recipientName: string }) | null;
 };
@@ -89,11 +91,19 @@ function displayNameById(id: string): string {
   return getLocalProfiles().find((profile) => profile.id === id)?.display_name ?? "Любимый человек";
 }
 
+function genderById(id: string): "male" | "female" | "unspecified" {
+  const profile = getLocalProfiles().find((p) => p.id === id);
+  if (!profile) return "unspecified";
+  const g = profile.gender;
+  if (g === "male" || g === "female") return g;
+  return "unspecified";
+}
+
 export async function localGetHugState(): Promise<LocalHugState> {
   const current = getLocalCurrentUser();
   const partner = getLocalPartner();
   if (!current || !partner) {
-    return { currentUserId: current?.id ?? null, currentName: current?.display_name ?? null, partnerName: partner?.display_name ?? null, incoming: null, outgoing: null };
+    return { currentUserId: current?.id ?? null, currentName: current?.display_name ?? null, currentGender: current ? genderById(current.id) : null, partnerName: partner?.display_name ?? null, partnerGender: partner ? genderById(partner.id) : null, incoming: null, outgoing: null };
   }
 
   const data = await readData();
@@ -110,7 +120,9 @@ export async function localGetHugState(): Promise<LocalHugState> {
   return {
     currentUserId: current.id,
     currentName: displayNameById(current.id),
+    currentGender: genderById(current.id),
     partnerName: displayNameById(partner.id),
+    partnerGender: genderById(partner.id),
     incoming: incoming ? { ...incoming, senderName: displayNameById(incoming.sender_id) } : null,
     outgoing: outgoing ? { ...outgoing, recipientName: displayNameById(outgoing.recipient_id) } : null
   };

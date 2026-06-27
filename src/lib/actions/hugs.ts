@@ -24,11 +24,13 @@ export type HugSignalRecord = {
   sender_seen_at: string | null;
 };
 
-/** State for the current user + partner, with denormalized display names. */
+/** State for the current user + partner, with denormalized display names and gender. */
 export type HugState = {
   currentUserId: string | null;
   currentName: string | null;
+  currentGender: "male" | "female" | "unspecified" | null;
   partnerName: string | null;
+  partnerGender: "male" | "female" | "unspecified" | null;
   incoming: (HugSignalRecord & { senderName: string }) | null;
   outgoing: (HugSignalRecord & { recipientName: string }) | null;
 };
@@ -38,7 +40,9 @@ export type { LocalHugState } from "@/lib/local-store";
 const EMPTY_STATE: HugState = {
   currentUserId: null,
   currentName: null,
+  currentGender: null,
   partnerName: null,
+  partnerGender: null,
   incoming: null,
   outgoing: null
 };
@@ -67,7 +71,7 @@ function pickIncoming(signals: HugSignalRecord[], recipientId: string): HugSigna
   return signals.find((signal) => signal.recipient_id === recipientId && signal.status === "missing") ?? null;
 }
 
-type ProfileRow = { id: string; display_name: string };
+type ProfileRow = { id: string; display_name: string; gender: string | null };
 function pickPartner(profiles: ProfileRow[], currentUserId: string): ProfileRow | null {
   return profiles.find((profile) => profile.id !== currentUserId) ?? null;
 }
@@ -92,7 +96,7 @@ async function buildSupabaseHugState(
   coupleId: string,
   currentUserId: string
 ): Promise<HugState> {
-  const { data, error } = await supabase.from("profiles").select("id, display_name").eq("couple_id", coupleId);
+  const { data, error } = await supabase.from("profiles").select("id, display_name, gender").eq("couple_id", coupleId);
   if (error) throw error;
 
   const profiles = (data ?? []) as ProfileRow[];
@@ -115,10 +119,17 @@ async function buildSupabaseHugState(
   return {
     currentUserId,
     currentName: current.display_name,
+    currentGender: normalizeGender(current.gender ?? null),
     partnerName: partner.display_name,
+    partnerGender: normalizeGender(partner.gender ?? null),
     incoming: incoming ? { ...incoming, senderName: partner.display_name } : null,
     outgoing: outgoing ? { ...outgoing, recipientName: partner.display_name } : null
   };
+}
+
+function normalizeGender(value: string | null): "male" | "female" | "unspecified" {
+  if (value === "male" || value === "female" || value === "unspecified") return value;
+  return "unspecified";
 }
 
 /** Loads the current hug state for the signed-in user. */

@@ -56,6 +56,15 @@ body {
   background-color: rgba(98, 57, 90, 0.86);
 }
 
+:root[data-theme="night"] .bg-cream {
+  /* In dark mode the receiver's message bubble must flip from light cream
+     to a deep plum so the (already light) `text-ink` stays readable.
+     Without this override, the bubble kept its cream fill and the new
+     light text-color was nearly invisible on top of it. */
+  background-color: rgba(55, 34, 58, 0.85);
+  color: rgba(250, 229, 240, 0.95);
+}
+
 :root[data-theme="night"] .text-ink,
 :root[data-theme="night"] .text-ink\/75,
 :root[data-theme="night"] .text-ink\/72,

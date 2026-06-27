@@ -33,6 +33,7 @@ export type Database = {
           couple_id: string | null;
           display_name: string;
           avatar_url: string | null;
+          gender: string;
           created_at: string;
           updated_at: string;
         }>;
@@ -41,6 +42,7 @@ export type Database = {
           couple_id?: string | null;
           display_name?: string;
           avatar_url?: string | null;
+          gender?: string;
           created_at?: string;
           updated_at?: string;
         }>;

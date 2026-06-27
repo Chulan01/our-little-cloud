@@ -7,8 +7,12 @@ import { dismissHugSignal, getHugState, sendHugBack, sendMissSignal } from "@/li
 import type { LocalHugState } from "@/lib/local-store";
 import { Button } from "@/components/ui/Button";
 
-function hugVerb(name: string) {
-  return name.toLowerCase().includes("вика") ? "обняла" : "обнял";
+function pronounFor(partnerGender: "male" | "female" | "unspecified" | null | undefined): "он" | "она" {
+  return partnerGender === "female" ? "она" : "он";
+}
+
+function pastTenseFor(gender: "male" | "female" | "unspecified" | null | undefined): "обнял" | "обняла" {
+  return gender === "female" ? "обняла" : "обнял";
 }
 
 export function HugWidget() {
@@ -61,8 +65,11 @@ export function HugWidget() {
     startTransition(async () => {
       const result = await sendMissSignal();
       if (result.ok) {
+        // Use the partner's gender for the post-send confirmation so Maxim
+        // sending to Vika reads "Теперь она точно знает" (and vice versa).
+        const pronoun = pronounFor(state?.partnerGender);
         setState(result.data);
-        setNotice("Сигнал отправлен. Теперь он точно знает, что ты скучаешь.");
+        setNotice(`Сигнал отправлен. Теперь ${pronoun} точно знает, что ты скучаешь.`);
       } else {
         setNotice(result.error.message);
       }
@@ -183,7 +190,7 @@ export function HugWidget() {
               <div className="pr-6">
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-petal">
                   <HeartHandshake className="h-4 w-4" aria-hidden />
-                  {outgoing.recipientName} {hugVerb(outgoing.recipientName)} тебя
+                  {outgoing.recipientName} {pastTenseFor(state?.partnerGender)} тебя
                 </div>
                 <p className="text-sm leading-6 text-ink/70">Это объятие уже долетело. Можно чуть-чуть задержаться в нем.</p>
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
