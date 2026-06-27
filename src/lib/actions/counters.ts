@@ -30,10 +30,18 @@ export async function listCounters(): Promise<Result<LoveCounter[]>> {
   }
 
   return ok(
-    (counters ?? []).map((counter) => ({
-      ...counter,
-      computedValue: counter.is_auto && couple?.anniversary_date ? daysBetween(couple.anniversary_date) : counter.value
-    }))
+    (counters ?? []).map((counter) => {
+      const mode = (counter.display_mode as "normal" | "days_since_anniversary" | "infinity" | null) ?? "normal";
+      let computedValue: number;
+      if (mode === "days_since_anniversary" && couple?.anniversary_date) {
+        computedValue = daysBetween(couple.anniversary_date);
+      } else if (mode === "infinity") {
+        computedValue = Number.POSITIVE_INFINITY;
+      } else {
+        computedValue = counter.value;
+      }
+      return { ...counter, computedValue };
+    })
   );
 }
 
@@ -119,6 +127,7 @@ export async function setCounter(input: SetCounterInput): Promise<Result<LoveCou
   const supabase = createClient();
   const { data: counter } = await supabase.from("love_counters").select("*").eq("id", parsed.data.id).eq("couple_id", coupleId).single();
   if (!counter) return fail("NOT_FOUND", "Счетчик не найден.");
+  if (counter.is_auto) return fail("FORBIDDEN", "Автоматический счетчик нельзя менять вручную.");
 
   const delta = parsed.data.value - counter.value;
   const { data, error } = await supabase.from("love_counters").update({ value: parsed.data.value }).eq("id", counter.id).select("*").single();
@@ -146,6 +155,15 @@ export async function deleteCounter(input: { id: string }): Promise<Result<{ id:
 
   const { coupleId } = await requireCouple();
   const supabase = createClient();
+  const { data: counter } = await supabase
+    .from("love_counters")
+    .select("is_auto")
+    .eq("id", parsed.data.id)
+    .eq("couple_id", coupleId)
+    .single();
+  if (!counter) return fail("NOT_FOUND", "Счетчик не найден.");
+  if (counter.is_auto) return fail("FORBIDDEN", "Автоматический счетчик нельзя удалить.");
+
   const { error } = await supabase.from("love_counters").delete().eq("id", parsed.data.id).eq("couple_id", coupleId);
   if (error) {
     logServerError("deleteCounter", error);

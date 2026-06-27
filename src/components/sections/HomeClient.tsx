@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { GalleryHorizontalEnd, HeartHandshake, MessageCircleHeart, Sparkles } from "lucide-react";
+import { GalleryHorizontalEnd, Hash, HeartHandshake, MessageCircleHeart, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Couple, Profile } from "@/types/domain";
 import { GlassCard } from "@/components/ui/Card";
@@ -20,6 +20,7 @@ const cards = [
   { href: "/memories", title: "Комната воспоминаний", text: "даты, фото и маленькие истории", icon: Sparkles },
   { href: "/gallery", title: "Галерея", text: "ваша нежная лента моментов", icon: GalleryHorizontalEnd },
   { href: "/reasons", title: "365 причин", text: "каждый день еще один ответ на почему", icon: HeartHandshake },
+  { href: "/counters", title: "Счётчики", text: "дни вместе, любовь и поцелуи", icon: Hash },
   { href: "/secret", title: "Тайная комната", text: "сообщения только для вас двоих", icon: MessageCircleHeart }
 ];
 
@@ -99,7 +100,7 @@ export function HomeClient({
   };
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-5 pb-28 pt-16 md:pt-24">
+    <main className="mx-auto min-h-screen max-w-6xl px-5 pb-28 pt-16 md:pt-24 space-y-12">
       <section className="flex min-h-[70vh] flex-col items-center justify-center text-center">
         <motion.p className="font-script text-3xl text-petal" animate={secretTitleOpen ? { scale: [1, 1.08, 1] } : {}} transition={{ duration: 1.2, repeat: secretTitleOpen ? Infinity : 0 }}>
           там, где каждый день бережно хранит вас
@@ -237,7 +238,7 @@ export function HomeClient({
         </GlassCard>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {cards.map((card) => {
           const Icon = card.icon;
           return (

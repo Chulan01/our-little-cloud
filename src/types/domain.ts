@@ -8,6 +8,7 @@ export type LoveReason = Database["public"]["Tables"]["love_reasons"]["Row"];
 export type TimeCapsule = Database["public"]["Views"]["time_capsules_safe"]["Row"];
 export type LoveCounter = Database["public"]["Tables"]["love_counters"]["Row"] & {
   computedValue?: number;
+  display_mode?: "normal" | "days_since_anniversary" | "infinity";
 };
 export type CounterHistory = Database["public"]["Tables"]["counter_history"]["Row"];
 export type SecretMessage = Database["public"]["Views"]["secret_messages_safe"]["Row"];

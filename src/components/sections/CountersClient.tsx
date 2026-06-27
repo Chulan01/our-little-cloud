@@ -62,15 +62,25 @@ export function CountersClient({ initialCounters, supabaseReady }: { initialCoun
         <EmptyState title="Счетчиков пока нет" description="Добавь первый счетчик, например поцелуи, свидания или прогулки." />
       ) : (
         <div className="grid gap-5 md:grid-cols-3">
-          {initialCounters.map((counter) => (
+          {initialCounters.map((counter) => {
+            const mode = (counter.display_mode as "normal" | "days_since_anniversary" | "infinity" | null) ?? "normal";
+            const poeticLine =
+              mode === "infinity"
+                ? counter.label === "Поцелуев"
+                  ? "столько, сколько хочется повторять"
+                  : "не измерить ни временем, ни расстоянием"
+                : mode === "days_since_anniversary"
+                  ? "с первого дня вместе"
+                  : null;
+            return (
             <Card key={counter.id} className="text-center">
-              <div className={counter.id === "local-kisses-infinity" ? "text-3xl" : "text-4xl"}>{counter.emoji || "♡"}</div>
+              <div className={mode === "infinity" ? "text-3xl" : "text-4xl"}>{counter.emoji || "♡"}</div>
               <h2 className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-ink/55">{counter.label}</h2>
               <div className="my-5 font-display text-6xl text-ink">
                 <Counter value={counter.computedValue ?? counter.value} />
               </div>
-              {counter.id === "local-kisses-infinity" ? (
-                <p className="-mt-3 mb-5 text-sm leading-6 text-ink/60">столько, сколько хочется повторять</p>
+              {poeticLine ? (
+                <p className="-mt-3 mb-5 text-sm leading-6 text-ink/60">{poeticLine}</p>
               ) : null}
               <div className="flex justify-center gap-2">
                 {!counter.is_auto ? (
@@ -93,7 +103,8 @@ export function CountersClient({ initialCounters, supabaseReady }: { initialCoun
                 ) : null}
               </div>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
       {message ? <p className="mt-4 text-center text-sm text-ink/65">{message}</p> : null}
