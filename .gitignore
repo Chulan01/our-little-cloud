@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build outputs
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Local env (NEVER commit real Supabase keys)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Local-mode user data store (memory, messages, hugs — private!)
+work/
+work/local-data.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+
+# Vercel/Next cached traces
+next-env.d.ts.bak
+
+# Dev artifacts
+.dev.log
+.dev.pid
+
+nul
+NUL

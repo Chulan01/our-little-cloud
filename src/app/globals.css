@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="night"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  transition: background 320ms ease, color 320ms ease;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.96), transparent 28rem),
+    radial-gradient(circle at 84% 24%, rgba(255, 224, 212, 0.72), transparent 30rem),
+    radial-gradient(circle at 50% 100%, rgba(255, 228, 243, 0.9), transparent 36rem),
+    linear-gradient(135deg, #fff0f8 0%, #fffaf6 44%, #ffe0d4 100%);
+  color: #6b5563;
+  text-rendering: optimizeLegibility;
+}
+
+:root[data-theme="night"] body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 210, 235, 0.18), transparent 24rem),
+    radial-gradient(circle at 80% 22%, rgba(177, 135, 255, 0.18), transparent 28rem),
+    radial-gradient(circle at 50% 100%, rgba(236, 95, 156, 0.16), transparent 34rem),
+    linear-gradient(135deg, #1f1422 0%, #2a1830 48%, #3b2238 100%);
+  color: #f7dfeb;
+}
+
+:root[data-theme="night"] .bg-white\/72,
+:root[data-theme="night"] .bg-white\/70,
+:root[data-theme="night"] .bg-white\/60,
+:root[data-theme="night"] .bg-white\/55,
+:root[data-theme="night"] .bg-white\/50,
+:root[data-theme="night"] .bg-white\/45,
+:root[data-theme="night"] .bg-white\/35 {
+  background-color: rgba(55, 34, 58, 0.72);
+}
+
+:root[data-theme="night"] .bg-blush,
+:root[data-theme="night"] .bg-blush\/80 {
+  background-color: rgba(98, 57, 90, 0.86);
+}
+
+:root[data-theme="night"] .text-ink,
+:root[data-theme="night"] .text-ink\/75,
+:root[data-theme="night"] .text-ink\/72,
+:root[data-theme="night"] .text-ink\/70,
+:root[data-theme="night"] .text-ink\/68,
+:root[data-theme="night"] .text-ink\/65,
+:root[data-theme="night"] .text-ink\/60,
+:root[data-theme="night"] .text-ink\/55 {
+  color: rgba(250, 229, 240, 0.9);
+}
+
+:root[data-theme="night"] .ring-white\/70,
+:root[data-theme="night"] .ring-white\/60 {
+  --tw-ring-color: rgba(255, 225, 240, 0.18);
+}
+
+:root[data-theme="night"] .shadow-cloud,
+:root[data-theme="night"] .shadow-glow {
+  box-shadow: 0 18px 60px -24px rgba(236, 95, 156, 0.78);
+}
+
+:root[data-theme="night"] .home-cloud-shape {
+  color: rgba(255, 246, 251, 0.96);
+  filter: drop-shadow(0 18px 28px rgba(236, 95, 156, 0.22)) drop-shadow(0 0 22px rgba(255, 210, 235, 0.32));
+}
+
+:root[data-theme="night"] .home-cloud-label {
+  color: #5d4054;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 18px rgba(255, 210, 235, 0.45);
+}
+
+:root[data-theme="night"] .home-days-card {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 216, 236, 0.2), transparent 5rem),
+    rgba(49, 30, 54, 0.82);
+  color: rgba(255, 234, 244, 0.92);
+  border: 1px solid rgba(255, 225, 240, 0.2);
+  box-shadow: 0 20px 60px -28px rgba(236, 95, 156, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="night"] .home-days-label {
+  color: rgba(255, 234, 244, 0.78);
+}
+
+:root[data-theme="night"] .home-days-number {
+  color: #ff9ccc;
+  text-shadow: 0 0 28px rgba(236, 95, 156, 0.45);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(252, 198, 224, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
