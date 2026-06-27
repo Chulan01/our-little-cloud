@@ -3,9 +3,31 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getUnreadMessageCount } from "@/lib/actions/messages";
-import { pushToast } from "@/lib/toast";
+import { pushToast, UNREAD_TOAST_WATERMARK_KEY } from "@/lib/toast";
 
 const POLL_INTERVAL_MS = 15_000;
+
+// We track the highest unread count we've already announced in sessionStorage
+// so that a manual page refresh (which unmounts + remounts the layout) doesn't
+// re-fire the same toast for the same backlog. The watermark is bumped on
+// every increase *and* lowered when the user reads messages, so a new
+// message arriving after a partial read still surfaces a fresh toast.
+
+function readShownCount(): number {
+  if (typeof window === "undefined") return 0;
+  const raw = window.sessionStorage.getItem(UNREAD_TOAST_WATERMARK_KEY);
+  const parsed = raw === null ? 0 : Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+}
+
+function writeShownCount(value: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(UNREAD_TOAST_WATERMARK_KEY, String(value));
+  } catch {
+    // sessionStorage may be unavailable (private mode, etc.) — silently ignore.
+  }
+}
 
 function pluralizeMessages(n: number): string {
   const mod10 = n % 10;
@@ -17,9 +39,8 @@ function pluralizeMessages(n: number): string {
 
 /**
  * Polls `getUnreadMessageCount()` on the client and fires a toast:
- *   • once on first mount, if there is anything unread (so a partner who
- *     left a message gets a "your other half left you a message" prompt
- *     when the second user lands on the site);
+ *   • once on first mount, if there is anything unread AND we haven't
+ *     already announced this backlog in the current tab session;
  *   • again whenever the count grows, so a fresh message arriving while
  *     the user is already browsing still surfaces a notification.
  * Also calls `router.refresh()` on growth so server-rendered badges
@@ -34,7 +55,8 @@ export function MessageNotifListener({ initial }: { initial: number }) {
     if (mounted.current) return;
     mounted.current = true;
 
-    if (lastCount.current > 0) {
+    // Mount-time announcement: only if this backlog hasn't been announced yet.
+    if (lastCount.current > 0 && lastCount.current > readShownCount()) {
       pushToast({
         title: "Твоя половинка оставила тебе сообщение",
         body: lastCount.current === 1 ? "Открой Тайную, чтобы прочитать" : `У тебя ${lastCount.current} ${pluralizeMessages(lastCount.current)} в Тайной`,
@@ -42,6 +64,7 @@ export function MessageNotifListener({ initial }: { initial: number }) {
         href: "/secret",
         duration: 7000
       });
+      writeShownCount(lastCount.current);
     }
 
     let cancelled = false;
@@ -58,7 +81,14 @@ export function MessageNotifListener({ initial }: { initial: number }) {
             href: "/secret",
             duration: 6000
           });
+          writeShownCount(count);
           router.refresh();
+        } else if (count < lastCount.current) {
+          // The user read some messages. Lower the watermark so a future
+          // new message (even if the count is still below the previous
+          // peak) will fire a toast again.
+          const watermark = readShownCount();
+          if (watermark > count) writeShownCount(count);
         }
         lastCount.current = count;
       } catch {

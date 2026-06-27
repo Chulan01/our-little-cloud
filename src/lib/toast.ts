@@ -13,6 +13,12 @@ export type ToastDetail = {
 
 export const TOAST_EVENT = "our-little-cloud:toast";
 
+// Shared key for the sessionStorage watermark that suppresses the
+// "your partner left you a message" toast on every page refresh. Read by
+// `MessageNotifListener` and cleared by `SignOutButton` so a sign-out +
+// sign-in cycle re-arms the mount-time notification.
+export const UNREAD_TOAST_WATERMARK_KEY = "our-little-cloud:unread-toast-watermark";
+
 /**
  * Fire a toast. The `<ToastContainer />` mounted in the root layout listens
  * for these events and renders the corresponding floating card. Safe to call

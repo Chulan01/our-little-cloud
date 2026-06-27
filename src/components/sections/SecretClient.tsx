@@ -42,6 +42,9 @@ export function SecretClient({
                 onClick={() => {
                   startTransition(async () => {
                     const result = await markAsRead({ id: message.id });
+                    // `markAsRead` already calls `revalidatePath("/", "layout")`,
+                    // which makes Next.js re-render the navbar / bottom-tab with
+                    // the new unread count without a second client-side fetch.
                     setNotice(result.ok ? "Отмечено прочитанным." : result.error.message);
                   });
                 }}
