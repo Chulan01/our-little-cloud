@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, Mail } from "lucide-react";
-import { localLogin, sendMagicLink } from "@/lib/actions/auth";
+import { KeyRound } from "lucide-react";
+import { localLogin, signInWithPassword } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { CelebrationBurst } from "@/components/effects/CelebrationBurst";
@@ -16,6 +16,11 @@ export function LoginForm() {
   const supabaseReady = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   const localAuthReady = process.env.NEXT_PUBLIC_LOCAL_AUTH_ENABLED === "true";
 
+  // On Vercel we use Supabase email+password (Maxim & Vika pre-created accounts).
+  // Local self-host mode keeps the env-driven username+password form.
+  const showPasswordForm = supabaseReady;
+  const showLocalLogin = localAuthReady && !supabaseReady;
+
   return (
     <form
       className="relative mt-8 w-full space-y-4"
@@ -23,7 +28,7 @@ export function LoginForm() {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
 
-        if (localAuthReady && !supabaseReady) {
+        if (showLocalLogin) {
           startTransition(async () => {
             const result = await localLogin({
               login: String(formData.get("login") ?? ""),
@@ -41,19 +46,32 @@ export function LoginForm() {
           return;
         }
 
-        startTransition(async () => {
-          const result = await sendMagicLink({ email: String(formData.get("email") ?? "") });
-          if (result.ok) {
-            setMessage("Письмо отправлено. Проверь почту и открой magic link.");
-            setBurst((value) => value + 1);
-          } else {
-            setMessage(result.error.message);
-          }
-        });
+        if (showPasswordForm) {
+          startTransition(async () => {
+            const result = await signInWithPassword({
+              email: String(formData.get("email") ?? ""),
+              password: String(formData.get("password") ?? "")
+            });
+            if (result.ok) {
+              setMessage("Входим...");
+              setBurst((value) => value + 1);
+              router.push("/");
+              router.refresh();
+            } else {
+              setMessage(result.error.message);
+            }
+          });
+          return;
+        }
+
+        // Neither auth backend is configured. Surface a clear config-side error
+        // instead of a dead magic-link button which Supabase would reject under
+        // our lock-down anyway ("Allow new users to sign up = OFF").
+        setMessage("Сервер не настроен: задай NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY в Vercel или .env.local.");
       }}
     >
       <CelebrationBurst trigger={burst} />
-      {localAuthReady && !supabaseReady ? (
+      {showLocalLogin ? (
         <>
           <Input name="login" placeholder="Логин" autoComplete="username" required />
           <Input name="password" type="password" placeholder="Пароль" autoComplete="current-password" required />
@@ -61,14 +79,32 @@ export function LoginForm() {
             {isPending ? "Вхожу..." : "Войти"}
           </Button>
         </>
-      ) : (
+      ) : showPasswordForm ? (
         <>
-          <Input name="email" type="email" placeholder="you@example.com" autoComplete="email" required />
-          <Button className="w-full" disabled={isPending} icon={<Mail className="h-4 w-4" aria-hidden />}>
-            {isPending ? "Отправляю..." : "Получить magic link"}
+          <Input
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            required
+          />
+          <Input
+            name="password"
+            type="password"
+            placeholder="Пароль"
+            autoComplete="current-password"
+            minLength={6}
+            required
+          />
+          <Button
+            className="w-full"
+            disabled={isPending}
+            icon={<KeyRound className="h-4 w-4" aria-hidden />}
+          >
+            {isPending ? "Вхожу..." : "Войти"}
           </Button>
         </>
-      )}
+      ) : null}
       {message ? <p className="text-sm leading-6 text-ink/70">{message}</p> : null}
     </form>
   );
