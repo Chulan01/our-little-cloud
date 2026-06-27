@@ -19,8 +19,17 @@ export function HugWidget() {
   const [isPending, startTransition] = useTransition();
 
   const refresh = () => {
+    // After sign-out `getHugState()` returns `fail(...)` because the
+    // server-side `requireCouple()` guard rejects. We must clear the cached
+    // widget state in that branch — otherwise the last `currentUserId` /
+    // `partnerName` linger in React memory and the panel still renders even
+    // on /login.
     getHugState().then((result) => {
-      if (result.ok) setState(result.data);
+      if (result.ok) {
+        setState(result.data);
+      } else {
+        setState(null);
+      }
     });
   };
 
@@ -36,6 +45,16 @@ export function HugWidget() {
       setHidden(false);
     }
   }, [state?.outgoing?.id, state?.outgoing?.status, state?.outgoing?.sender_seen_at]);
+
+  useEffect(() => {
+    // When a brand-new incoming hug arrives, pop the panel back open even
+    // if the user had previously dismissed an earlier one. The deps array is
+    // keyed on the row id, so 8-second polls that return the same `missing`
+    // row are a no-op and don't fight with the user's local `hidden=true`.
+    if (state?.incoming?.id) {
+      setHidden(false);
+    }
+  }, [state?.incoming?.id]);
 
   const sendMiss = () => {
     setHidden(false);
@@ -78,7 +97,12 @@ export function HugWidget() {
 
   const incoming = state?.incoming ?? null;
   const outgoing = state?.outgoing ?? null;
-  const showPanel = !hidden || incoming || outgoing;
+  // The X button (aria-label="Скрыть") must always hide the panel. The
+  // previous `!hidden || incoming || outgoing` made clicks a no-op whenever
+  // an active signal existed, defeating the intent of the close affordance.
+  // The compact "Я скучаю" floater below is the only way to bring the panel
+  // back — including while a hug is waiting for a reply.
+  const showPanel = !hidden;
 
   // Hide the entire hug widget until both halves of the couple exist.
   // Without a partner, "Сигнал летит" / "Я скучаю" / incoming panel are
