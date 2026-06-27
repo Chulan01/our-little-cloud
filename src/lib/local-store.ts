@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cookies } from "next/headers";
 import { LOCAL_AUTH_COOKIE, getLocalProfiles, localUserId } from "@/lib/local-auth";
-import { getSeedReasons, relationshipStartDate } from "@/lib/reasons";
+import { anniversaryStart, getSeedReasons, relationshipStartDate } from "@/lib/reasons";
 import type { Couple, LoveCounter, LoveReason, Memory, Profile, SecretMessage, TimeCapsule } from "@/types/domain";
 import type { MemoryWithPhotos } from "@/lib/actions/memories";
 import type { CapsuleWithPhotos } from "@/lib/actions/capsules";
@@ -276,7 +276,8 @@ export async function localOpenCapsule(id: string): Promise<TimeCapsule | null> 
 
 export async function localListCounters(): Promise<LoveCounter[]> {
   const data = await readData();
-  const daysTogether = Math.max(0, Math.floor((Date.now() - new Date(`${relationshipStartDate()}T00:00:00.000Z`).getTime()) / 86_400_000));
+  const rawDays = (Date.now() - anniversaryStart(relationshipStartDate()).getTime()) / 86_400_000;
+  const daysTogether = Number.isFinite(rawDays) ? Math.max(0, Math.floor(rawDays)) : 0;
   const defaults: LoveCounter[] = [
     {
       id: "local-days-together",
