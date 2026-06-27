@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, pastDateSchema, photoListSchema } from "./shared";
+import { idSchema, pastDateSchema } from "./shared";
 
 export const createMemorySchema = z.object({
   memoryDate: pastDateSchema,
@@ -13,11 +13,5 @@ export const updateMemorySchema = createMemorySchema.extend({
 
 export const memoryIdSchema = z.object({ id: idSchema });
 
-export const addMemoryPhotosSchema = z.object({
-  memoryId: idSchema,
-  files: photoListSchema
-});
-
 export type CreateMemoryInput = z.infer<typeof createMemorySchema>;
 export type UpdateMemoryInput = z.infer<typeof updateMemorySchema>;
-export type AddMemoryPhotosInput = z.infer<typeof addMemoryPhotosSchema>;

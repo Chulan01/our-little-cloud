@@ -122,7 +122,15 @@ export function MemoriesClient({
               }
 
               if (files.length > 0 && photoUploadReady) {
-                const photoResult = await addMemoryPhotos({ memoryId: result.data.id, files });
+                // Build a fresh FormData so each `File`'s binary content
+                // survives the Server Action boundary intact. Passing
+                // `File[]` directly used to silently strip the bodies.
+                const photoFormData = new FormData();
+                photoFormData.append("memoryId", result.data.id);
+                for (const file of files) {
+                  photoFormData.append("files", file);
+                }
+                const photoResult = await addMemoryPhotos(photoFormData);
                 if (!photoResult.ok) {
                   setMessage(photoResult.error.message);
                   router.refresh();

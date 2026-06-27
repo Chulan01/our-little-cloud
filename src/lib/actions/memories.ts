@@ -6,7 +6,8 @@ import { hasSupabaseEnv, isLocalStoreDisabled } from "@/lib/env";
 import { localCreateMemory, localDeleteMemory, localListMemories } from "@/lib/local-store";
 import { createClient } from "@/lib/supabase/server";
 import { deletePhoto, getSignedUrl, uploadPhoto } from "@/lib/utils/storage";
-import { addMemoryPhotosSchema, createMemorySchema, memoryIdSchema, updateMemorySchema, type CreateMemoryInput, type UpdateMemoryInput } from "@/lib/validations/memory";
+import { createMemorySchema, memoryIdSchema, updateMemorySchema, type CreateMemoryInput, type UpdateMemoryInput } from "@/lib/validations/memory";
+import { idSchema } from "@/lib/validations/shared";
 import { fail, logServerError, ok, validationError, type Result } from "@/lib/utils/errors";
 import type { Memory, MemoryPhoto } from "@/types/domain";
 
@@ -145,20 +146,53 @@ export async function deleteMemory(input: { id: string }): Promise<Result<{ id: 
   return ok({ id: parsed.data.id });
 }
 
-/** Adds photos to a memory and stores metadata in Postgres. */
-export async function addMemoryPhotos(input: { memoryId: string; files: File[] }): Promise<Result<MemoryPhoto[]>> {
-  const parsed = addMemoryPhotosSchema.safeParse(input);
-  if (!parsed.success) return validationError(parsed.error);
+/**
+ * Adds photos to an existing memory.
+ *
+ * Why this accepts a `FormData` and not `{ memoryId, files: File[] }`:
+ * Next.js Server Actions do support `File` arguments, but a `File[]` field
+ * crosses the boundary in a way that can lose the binary content of large or
+ * non-trivial uploads — the multipart body is reconstructed server-side and
+ * the Zod schema's `instanceof File` guard often fails on the server runtime
+ * (`"value is not a File"`), which silently rejects every photo. Passing the
+ * form's `FormData` directly routes through Next.js's reliable multipart path
+ * and `instanceof File` works again, so we validate with simple checks here.
+ */
+export async function addMemoryPhotos(formData: FormData): Promise<Result<MemoryPhoto[]>> {
   if (!hasSupabaseEnv()) return fail("SERVER", "Фото получится сохранить после подключения облачного хранения.");
 
   const { coupleId } = await requireCouple();
   const supabase = createClient();
+
+  const memoryIdRaw = formData.get("memoryId");
+  if (typeof memoryIdRaw !== "string") {
+    return fail("VALIDATION", "Не указан идентификатор воспоминания.");
+  }
+  const memoryIdParsed = idSchema.safeParse(memoryIdRaw);
+  if (!memoryIdParsed.success) return validationError(memoryIdParsed.error);
+
+  const files = formData
+    .getAll("files")
+    .filter((item): item is File => item instanceof File && item.size > 0)
+    .slice(0, 8);
+
+  if (files.length === 0) return ok([]);
+
+  for (const file of files) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      return fail("VALIDATION", `${file.name || "фото"}: поддерживаются только JPG, PNG и WebP.`);
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return fail("VALIDATION", `${file.name || "фото"}: фото должно быть не больше 5MB.`);
+    }
+  }
+
   const uploaded = await Promise.all(
-    parsed.data.files.map((file) => uploadPhoto({ coupleId, entity: "memories", entityId: parsed.data.memoryId, file }))
+    files.map((file) => uploadPhoto({ coupleId, entity: "memories", entityId: memoryIdParsed.data, file }))
   );
 
   const rows = uploaded.map((photo, index) => ({
-    memory_id: parsed.data.memoryId,
+    memory_id: memoryIdParsed.data,
     couple_id: coupleId,
     storage_path: photo.path,
     width: photo.width,
