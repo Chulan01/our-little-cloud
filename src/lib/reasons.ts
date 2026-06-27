@@ -1,15 +1,9 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { LoveReason } from "@/types/domain";
+import { RELATIONSHIP_TZ_OFFSET_MS, anniversaryStart } from "./timezone";
 
-const START_DATE = "2026-06-08";
 const REASONS_FILE = path.join(process.cwd(), "src", "data", "reasons.txt");
-
-// The couple is in Moscow (UTC+3). We treat the anniversary as "00:00 local
-// time" so the day counter rolls over when they wake up on the morning of
-// 8 June, not 3 hours earlier in UTC. If the couple ever moves timezones,
-// change this single constant.
-const RELATIONSHIP_TZ_OFFSET_MS = 3 * 60 * 60 * 1000;
 
 /**
  * Read once at module load. The file is small and rarely changes,
@@ -19,23 +13,6 @@ const REASON_TEXTS: string[] = readFileSync(REASONS_FILE, "utf8")
   .split(/\r?\n/)
   .map((line) => line.trim())
   .filter(Boolean);
-
-export function relationshipStartDate(): string {
-  return START_DATE;
-}
-
-/**
- * Parses a YYYY-MM-DD anniversary string as 00:00 in the couple's local
- * timezone (Moscow) and returns the corresponding absolute `Date`.
- *
- * The DB stores `anniversary_date` as a date-only column, so we attach the
- * explicit `+03:00` offset rather than letting `new Date("2026-06-08")`
- * default to UTC midnight — otherwise the day counter would tick over 3
- * hours before the couple's local midnight.
- */
-export function anniversaryStart(anniversaryDate: string = START_DATE): Date {
-  return new Date(`${anniversaryDate}T00:00:00+03:00`);
-}
 
 export function getAllReasonTexts(): string[] {
   return REASON_TEXTS;
