@@ -124,7 +124,98 @@ textarea {
   background: rgba(252, 198, 224, 0.55);
 }
 
+/* Hand-cut paper-collage cloud shapes used by the milestone cascade. Three
+   organic border-radius variants keep 30 reason bubbles from looking like
+   a uniform grid — each card gets a slightly different silhouette while
+   staying recognisable as a "cloud". The Tailwind bg/color utilities still
+   apply on top, so dark mode and tone variations are inherited as usual. */
+.bubble-blob-a {
+  border-radius: 62% 38% 66% 34% / 56% 64% 36% 44%;
+}
+.bubble-blob-b {
+  border-radius: 38% 62% 34% 66% / 64% 36% 64% 36%;
+}
+.bubble-blob-c {
+  border-radius: 50% 50% 44% 56% / 56% 44% 56% 44%;
+}
+
+/* Soft drop shadow tuned for the irregular silhouettes so the cloud feels
+   lifted off the page without a hard rim. */
+.bubble-shadow {
+  box-shadow:
+    0 22px 50px -22px rgba(236, 95, 156, 0.42),
+    0 6px 18px -8px rgba(236, 95, 156, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+:root[data-theme="night"] .bubble-shadow {
+  box-shadow:
+    0 22px 50px -22px rgba(236, 95, 156, 0.55),
+    0 0 0 1px rgba(255, 225, 240, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Header halo used behind the cascade's "X месяцев вместе" headline.
+   Soft pink radial gradient that breathes to give the cascade a sense
+   of warmth without overlaying typography. The ellipse is centered via
+   `left: 50%` and pulled back into shape with `translate(-50%, 0)`. */
+.cascade-halo {
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(252, 198, 224, 0.55),
+    rgba(255, 224, 212, 0.18) 45%,
+    rgba(255, 224, 212, 0) 75%
+  );
+  animation: halo-breathe 5.5s ease-in-out infinite;
+}
+
+@keyframes halo-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translate(-50%, 0) scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate(-50%, -4px) scale(1.06);
+  }
+}
+
+/* Inner twinkling sparkles inside each cloud bubble. Per-card
+   `animation-delay` staggers them so the cascade feels alive without
+   ever looking uniform. */
+@keyframes sparkle-twinkle {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.65);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.18);
+  }
+}
+
+.sparkle-twinkle {
+  animation: sparkle-twinkle 2.8s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+:root[data-theme="night"] .cascade-halo {
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(236, 95, 156, 0.42),
+    rgba(177, 135, 255, 0.18) 45%,
+    rgba(177, 135, 255, 0) 75%
+  );
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .cascade-halo,
+  .sparkle-twinkle {
+    animation: none;
+  }
   *,
   *::before,
   *::after {

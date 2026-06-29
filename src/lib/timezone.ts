@@ -27,3 +27,20 @@ export function relationshipStartDate(): string {
 export function anniversaryStart(anniversaryDate: string = START_DATE): Date {
   return new Date(`${anniversaryDate}T00:00:00+03:00`);
 }
+
+/**
+ * Returns `year` / `month` / `day` of `date` interpreted in the couple's
+ * Moscow timezone (+03:00), regardless of the host system clock TZ.
+ * Use instead of `Date#getDate()` / `#getMonth()` when calendar comparisons
+ * matter — those return LOCAL time, which can be off by one day when the
+ * server runs in UTC.
+ */
+export function mskYmd(date: Date | number): { year: number; month: number; day: number } {
+  const ms = typeof date === "number" ? date : date.getTime();
+  const shifted = new Date(ms + RELATIONSHIP_TZ_OFFSET_MS);
+  return {
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth(),
+    day: shifted.getUTCDate()
+  };
+}
