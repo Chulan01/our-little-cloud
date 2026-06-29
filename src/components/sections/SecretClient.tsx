@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Send } from "lucide-react";
-import { markAsRead, sendMessage } from "@/lib/actions/messages";
+import { markAsRead, markIncomingAsRead, sendMessage } from "@/lib/actions/messages";
 import type { Profile, SecretMessage } from "@/types/domain";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -25,6 +25,18 @@ export function SecretClient({
   const [burst, setBurst] = useState(0);
   const [isPending, startTransition] = useTransition();
   const canSend = Boolean(currentUserId && partner && supabaseReady);
+
+  // Auto-mark every incoming, already-revealed, unread message as read the
+  // moment the user lands on /secret. This drops the navbar / bottom-tab
+  // badge to zero without needing a per-message click — matching normal
+  // messenger UX. Re-runs only when the identity or storage readiness
+  // changes (effectively: once per page view per signed-in user).
+  useEffect(() => {
+    if (!currentUserId || !supabaseReady) return;
+    startTransition(async () => {
+      await markIncomingAsRead();
+    });
+  }, [currentUserId, supabaseReady, startTransition]);
 
   return (
     <Card className="relative space-y-4">

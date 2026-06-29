@@ -86,9 +86,11 @@ export function MessageNotifListener({ initial }: { initial: number }) {
         } else if (count < lastCount.current) {
           // The user read some messages. Lower the watermark so a future
           // new message (even if the count is still below the previous
-          // peak) will fire a toast again.
+          // peak) will fire a toast again, and refresh so the navbar /
+          // bottom-tab badge updates immediately.
           const watermark = readShownCount();
           if (watermark > count) writeShownCount(count);
+          router.refresh();
         }
         lastCount.current = count;
       } catch {

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireCouple } from "@/lib/auth/guard";
 import { hasSupabaseEnv, isLocalStoreDisabled } from "@/lib/env";
-import { getLocalCurrentUser, localCountUnreadMessages, localListMessages, localMarkMessageRead, localSendMessage } from "@/lib/local-store";
+import { getLocalCurrentUser, localCountUnreadMessages, localListMessages, localMarkAllIncomingRead, localMarkMessageRead, localSendMessage } from "@/lib/local-store";
 import { createClient } from "@/lib/supabase/server";
 import { markAsReadSchema, sendMessageSchema, type SendMessageInput } from "@/lib/validations/message";
 import { fail, logServerError, ok, validationError, type Result } from "@/lib/utils/errors";
@@ -154,4 +154,54 @@ export async function markAsRead(input: { id: string }): Promise<Result<SecretMe
   revalidatePath("/secret");
   revalidatePath("/", "layout");
   return ok({ ...data, body: data.body, is_revealed: true });
+}
+
+/**
+ * Marks every incoming, currently-revealed, still-unread message as read in a
+ * single bulk update. Used by `/secret` on mount so the navbar / bottom-tab
+ * badge drops to zero the moment the user opens the room — instead of waiting
+ * for per-message clicks. No-op (and skips revalidation) when there is
+ * nothing to mark.
+ */
+export async function markIncomingAsRead(): Promise<Result<{ count: number }>> {
+  if (!hasSupabaseEnv()) {
+    if (isLocalStoreDisabled()) return fail("SERVER", "Хранилище не настроено на этом сервере. Подключите Supabase.");
+    const user = getLocalCurrentUser();
+    if (!user) return ok({ count: 0 });
+    const count = await localMarkAllIncomingRead(user.id);
+    if (count > 0) {
+      revalidatePath("/secret");
+      revalidatePath("/", "layout");
+    }
+    return ok({ count });
+  }
+
+  const { user, coupleId } = await requireCouple();
+  const supabase = createClient();
+  const nowIso = new Date().toISOString();
+  // PostgREST splits each `.or()` clause on the last `.` to find the value,
+  // so an ISO with milliseconds (`…:34:56.789Z`) gets truncated. Strip ms
+  // before composing the filter — Postgres' timestamp comparator still
+  // matches correctly because all stored `reveal_at` values are ISO too.
+  const nowForFilter = nowIso.replace(/\.\d{3}Z$/, "Z");
+  const { data, error } = await supabase
+    .from("secret_messages")
+    .update({ is_read: true, read_at: nowIso })
+    .eq("couple_id", coupleId)
+    .eq("recipient_id", user.id)
+    .eq("is_read", false)
+    .or(`reveal_at.is.null,reveal_at.lte.${nowForFilter}`)
+    .select("id");
+
+  if (error) {
+    logServerError("markIncomingAsRead", error);
+    return fail("SERVER", "Не получилось отметить прочтение.");
+  }
+
+  if (data && data.length > 0) {
+    revalidatePath("/secret");
+    revalidatePath("/", "layout");
+  }
+
+  return ok({ count: data?.length ?? 0 });
 }

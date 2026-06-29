@@ -396,3 +396,24 @@ export async function localMarkMessageRead(id: string): Promise<SecretMessage | 
   await writeData(data);
   return message;
 }
+
+/**
+ * Marks every incoming, currently-revealed, still-unread message for the
+ * given user as read. Returns the number of rows that changed so the server
+ * action can decide whether revalidation is worth doing.
+ */
+export async function localMarkAllIncomingRead(userId: string): Promise<number> {
+  const data = await readData();
+  const currentMs = Date.now();
+  let count = 0;
+  for (const message of data.messages) {
+    if (message.recipient_id !== userId) continue;
+    if (message.is_read) continue;
+    if (message.reveal_at && new Date(message.reveal_at).getTime() > currentMs) continue;
+    message.is_read = true;
+    message.read_at = now();
+    count++;
+  }
+  if (count > 0) await writeData(data);
+  return count;
+}
