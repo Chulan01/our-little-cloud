@@ -10,7 +10,7 @@ export function BottomTabBar({ unreadSecret = 0 }: { unreadSecret?: number } = {
   const pathname = usePathname();
   return (
     <nav className="fixed inset-x-2 bottom-3 z-40 rounded-3xl bg-white/72 p-1.5 shadow-glow ring-1 ring-white/70 backdrop-blur-xl md:hidden" aria-label="Нижняя навигация">
-      <div className="grid grid-cols-6 gap-1">
+      <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}>
         {navItems.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;

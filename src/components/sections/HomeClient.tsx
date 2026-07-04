@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { GalleryHorizontalEnd, Hash, HeartHandshake, MessageCircleHeart, Sparkles } from "lucide-react";
+import { GalleryHorizontalEnd, Hash, HeartHandshake, MapPin, MessageCircleHeart, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Couple, Profile } from "@/types/domain";
 import { GlassCard } from "@/components/ui/Card";
@@ -17,6 +17,8 @@ const REASON_STORAGE_KEY = "our-cloud-home-reason";
 const REASON_COOLDOWN_MS = 60 * 60 * 1000;
 
 const cards = [
+  { href: "/map", title: "Карта свиданий", text: "сердечки на карте города — там, где вы были", icon: MapPin },
+  { href: "/story", title: "Наша история", text: "хронология вашего первого месяца", icon: Sparkles },
   { href: "/memories", title: "Комната воспоминаний", text: "даты, фото и маленькие истории", icon: Sparkles },
   { href: "/gallery", title: "Галерея", text: "ваша нежная лента моментов", icon: GalleryHorizontalEnd },
   { href: "/reasons", title: "365 причин", text: "каждый день еще один ответ на почему", icon: HeartHandshake },

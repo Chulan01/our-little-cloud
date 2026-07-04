@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { LOCAL_AUTH_COOKIE, getLocalProfiles, localUserId } from "@/lib/local-auth";
 import { getSeedReasons } from "@/lib/reasons";
 import { anniversaryStart, relationshipStartDate } from "@/lib/timezone";
-import type { Couple, LoveCounter, LoveReason, Memory, Profile, SecretMessage, TimeCapsule } from "@/types/domain";
+import type { Couple, DateSpot, LoveCounter, LoveReason, Memory, Profile, SecretMessage, StoryEvent, TimeCapsule } from "@/types/domain";
 import type { MemoryWithPhotos } from "@/lib/actions/memories";
 import type { CapsuleWithPhotos } from "@/lib/actions/capsules";
 
@@ -15,6 +15,8 @@ type LocalData = {
   counters: LoveCounter[];
   messages: SecretMessage[];
   hugs: LocalHugSignal[];
+  spots: DateSpot[];
+  storyEvents: StoryEvent[];
 };
 
 export type LocalHugSignal = {
@@ -31,7 +33,7 @@ const DATA_PATH = path.join(process.cwd(), "work", "local-data.json");
 const now = () => new Date().toISOString();
 
 function emptyData(): LocalData {
-  return { memories: [], reasons: [], capsules: [], counters: [], messages: [], hugs: [] };
+  return { memories: [], reasons: [], capsules: [], counters: [], messages: [], hugs: [], spots: [], storyEvents: [] };
 }
 
 async function readData(): Promise<LocalData> {
@@ -347,6 +349,124 @@ export async function localIncrementCounter(id: string, delta: number): Promise<
 export async function localDeleteCounter(id: string): Promise<void> {
   const data = await readData();
   data.counters = data.counters.filter((counter) => counter.id !== id);
+  await writeData(data);
+}
+
+export async function localListSpots(): Promise<DateSpot[]> {
+  const data = await readData();
+  return [...data.spots].sort((a, b) => (a.spot_date ?? a.created_at).localeCompare(b.spot_date ?? b.created_at));
+}
+
+export async function localCreateSpot(input: {
+  title: string;
+  body: string;
+  lat: number;
+  lng: number;
+  spotDate?: string | null;
+  photoUrl?: string | null;
+}): Promise<DateSpot> {
+  const data = await readData();
+  const spot: DateSpot = {
+    id: crypto.randomUUID(),
+    couple_id: "local-couple",
+    title: input.title,
+    body: input.body,
+    lat: input.lat,
+    lng: input.lng,
+    spot_date: input.spotDate ?? null,
+    photo_url: input.photoUrl ?? null,
+    storage_path: null,
+    created_at: now(),
+    updated_at: now()
+  };
+  data.spots.push(spot);
+  await writeData(data);
+  return spot;
+}
+
+export async function localUpdateSpot(input: {
+  id: string;
+  title: string;
+  body: string;
+  lat: number;
+  lng: number;
+  spotDate?: string | null;
+  photoUrl?: string | null;
+}): Promise<DateSpot | null> {
+  const data = await readData();
+  const spot = data.spots.find((item) => item.id === input.id);
+  if (!spot) return null;
+  spot.title = input.title;
+  spot.body = input.body;
+  spot.lat = input.lat;
+  spot.lng = input.lng;
+  spot.spot_date = input.spotDate ?? null;
+  spot.photo_url = input.photoUrl ?? null;
+  spot.updated_at = now();
+  await writeData(data);
+  return spot;
+}
+
+export async function localDeleteSpot(id: string): Promise<void> {
+  const data = await readData();
+  data.spots = data.spots.filter((spot) => spot.id !== id);
+  await writeData(data);
+}
+
+export async function localListStoryEvents(): Promise<StoryEvent[]> {
+  const data = await readData();
+  return [...data.storyEvents].sort((a, b) => a.event_date.localeCompare(b.event_date));
+}
+
+export async function localCreateStoryEvent(input: {
+  eventDate: string;
+  title: string;
+  body: string;
+  emoji?: string | null;
+  photoUrl?: string | null;
+}): Promise<StoryEvent> {
+  const data = await readData();
+  const event: StoryEvent = {
+    id: crypto.randomUUID(),
+    couple_id: "local-couple",
+    event_date: input.eventDate,
+    title: input.title,
+    body: input.body,
+    emoji: input.emoji ?? null,
+    photo_url: input.photoUrl ?? null,
+    storage_path: null,
+    created_at: now(),
+    updated_at: now()
+  };
+  data.storyEvents.push(event);
+  await writeData(data);
+  return event;
+}
+
+export async function localUpdateStoryEvent(input: {
+  id: string;
+  eventDate: string;
+  title: string;
+  body: string;
+  emoji?: string | null;
+  photoUrl?: string | null;
+}): Promise<StoryEvent | null> {
+  const data = await readData();
+  const event = data.storyEvents.find((item) => item.id === input.id);
+  if (!event) return null;
+  event.event_date = input.eventDate;
+  event.title = input.title;
+  event.body = input.body;
+  event.emoji = input.emoji ?? null;
+  event.photo_url = input.photoUrl ?? null;
+  event.updated_at = now();
+  await writeData(data);
+  return event;
+}
+
+export async function localDeleteStoryEvent(id: string): Promise<void> {
+  const data = await readData();
+  data.storyEvents = data.storyEvents.filter((event) => event.id !== id);
   await writeData(data);
 }
 
