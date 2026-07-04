@@ -7,13 +7,13 @@ import { MapPin, Plus, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createSpot, deleteSpot, updateSpot } from "@/lib/actions/spots";
 import { pushToast } from "@/lib/toast";
-
-const showToast = (title: string) => pushToast({ title });
 import { Button } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/Card";
 import { DatePicker, Input, Textarea } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import type { DateSpotWithPhoto } from "@/types/domain";
+
+const showToast = (title: string) => pushToast({ title });
 
 const SpotMap = dynamic(() => import("@/components/map/SpotMap"), {
   ssr: false,

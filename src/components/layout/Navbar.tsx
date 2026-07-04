@@ -3,16 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { navItems } from "./nav-items";
+import { ShieldCheck } from "lucide-react";
+import { visibleNavItems } from "./nav-items";
 import { SignOutButton } from "./SignOutButton";
 import { cn } from "@/lib/utils";
 
-export function Navbar({ unreadSecret = 0 }: { unreadSecret?: number } = {}) {
+export function Navbar({ unreadSecret = 0, canViewAll = false, isAdmin = false }: { unreadSecret?: number; canViewAll?: boolean; isAdmin?: boolean } = {}) {
   const pathname = usePathname();
+  const items = visibleNavItems(canViewAll || isAdmin);
   return (
     <header className="sticky top-4 z-40 mx-auto hidden w-[min(1120px,calc(100%-2rem))] rounded-full bg-white/55 px-3 py-2 shadow-cloud ring-1 ring-white/70 backdrop-blur-xl md:block">
       <nav className="flex items-center justify-between gap-1" aria-label="Основная навигация">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
           const showBadge = item.href === "/secret" && unreadSecret > 0;
@@ -31,6 +33,18 @@ export function Navbar({ unreadSecret = 0 }: { unreadSecret?: number } = {}) {
             </Link>
           );
         })}
+        {isAdmin ? (
+          <Link
+            href="/admin"
+            className={cn(
+              "relative flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-petal transition hover:text-petal/80 lg:px-4",
+              pathname === "/admin" && "text-petal"
+            )}
+          >
+            <ShieldCheck className="h-4 w-4" aria-hidden />
+            <span>Админ</span>
+          </Link>
+        ) : null}
         <SignOutButton />
       </nav>
     </header>

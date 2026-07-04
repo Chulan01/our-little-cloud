@@ -1,7 +1,10 @@
 import { ReasonsClient } from "@/components/sections/ReasonsClient";
+import { LockedSurprise } from "@/components/sections/LockedSurprise";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { listReasons } from "@/lib/actions/reasons";
+import { getSiteAccess } from "@/lib/auth/admin";
 import { requireCouple } from "@/lib/auth/guard";
+import { unlockAtMs } from "@/lib/unlock";
 import { hasSupabaseEnv } from "@/lib/env";
 import { isLocalAuthEnabled } from "@/lib/local-auth";
 import { getLocalCouple } from "@/lib/local-store";
@@ -28,6 +31,9 @@ function buildMilestoneChunk(daysTogether: number, allTexts: string[]): { number
 }
 
 export default async function ReasonsPage() {
+  const access = await getSiteAccess();
+  if (!access.canView) return <LockedSurprise unlockAt={unlockAtMs()} />;
+
   const supabaseReady = hasSupabaseEnv();
   const actionsReady = supabaseReady || isLocalAuthEnabled();
   const reasons = actionsReady ? await listReasons() : { ok: true as const, data: [] };

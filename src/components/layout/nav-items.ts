@@ -18,3 +18,16 @@ export const navItems: AppNavItem[] = [
   { href: "/counters", label: "Счетчики", shortLabel: "Счет", icon: LockKeyhole },
   { href: "/secret", label: "Тайная", shortLabel: "Тайна", icon: MessageCircleHeart }
 ];
+
+/**
+ * Routes visible before the 8 July reveal. Everything else is a "surprise"
+ * section whose label would spoil the gift, so we hide those from the nav
+ * until the site unlocks (or for the admin, who always sees everything).
+ */
+export const PUBLIC_HREFS = ["/", "/map"] as const;
+
+/** The nav shown to a given viewer. */
+export function visibleNavItems(canViewAll: boolean): AppNavItem[] {
+  if (canViewAll) return navItems;
+  return navItems.filter((item) => PUBLIC_HREFS.includes(item.href as (typeof PUBLIC_HREFS)[number]));
+}
