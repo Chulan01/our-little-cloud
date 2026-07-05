@@ -20,14 +20,14 @@ export const navItems: AppNavItem[] = [
 ];
 
 /**
- * Routes visible before the 8 July reveal. Everything else is a "surprise"
- * section whose label would spoil the gift, so we hide those from the nav
- * until the site unlocks (or for the admin, who always sees everything).
+ * Routes hidden from the nav before the 8 July reveal. Only "Наша история"
+ * is a surprise section; every other page is a pre-existing feature that
+ * stays fully visible and usable. The admin always sees everything.
  */
-export const PUBLIC_HREFS = ["/", "/map"] as const;
+export const LOCKED_HREFS = ["/story"] as const;
 
 /** The nav shown to a given viewer. */
 export function visibleNavItems(canViewAll: boolean): AppNavItem[] {
   if (canViewAll) return navItems;
-  return navItems.filter((item) => PUBLIC_HREFS.includes(item.href as (typeof PUBLIC_HREFS)[number]));
+  return navItems.filter((item) => !LOCKED_HREFS.includes(item.href as (typeof LOCKED_HREFS)[number]));
 }

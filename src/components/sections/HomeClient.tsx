@@ -42,13 +42,18 @@ export function HomeClient({
   couple,
   profiles,
   dailyReason,
-  reasonPool
+  reasonPool,
+  canViewAll = false
 }: {
   couple: Couple | null;
   profiles: Profile[];
   dailyReason: ReasonOption | null;
   reasonPool: ReasonOption[];
+  canViewAll?: boolean;
 }) {
+  // Hide the "Наша история" shortcut until the 8 July reveal so the home
+  // grid never spoils the surprise. The admin always sees it.
+  const visibleCards = canViewAll ? cards : cards.filter((card) => card.href !== "/story");
   const title = couple?.name ?? "Наше Облачко";
   const days = couple?.anniversary_date ? daysBetween(couple.anniversary_date) : 0;
   const visibleProfiles = profiles.map((profile) => ({ ...profile, display_name: normalizeProfileName(profile) }));
@@ -241,7 +246,7 @@ export function HomeClient({
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-        {cards.map((card) => {
+        {visibleCards.map((card) => {
           const Icon = card.icon;
           return (
             <Link key={card.href} href={card.href}>

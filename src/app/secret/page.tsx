@@ -1,10 +1,7 @@
 import { SecretClient } from "@/components/sections/SecretClient";
-import { LockedSurprise } from "@/components/sections/LockedSurprise";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { listMessages } from "@/lib/actions/messages";
-import { getSiteAccess } from "@/lib/auth/admin";
 import { requireCouple } from "@/lib/auth/guard";
-import { unlockAtMs } from "@/lib/unlock";
 import { hasSupabaseEnv } from "@/lib/env";
 import { getLocalCurrentUser, getLocalPartner } from "@/lib/local-store";
 import { isLocalAuthEnabled } from "@/lib/local-auth";
@@ -14,9 +11,6 @@ import type { Profile } from "@/types/domain";
 export const dynamic = "force-dynamic";
 
 export default async function SecretPage() {
-  const access = await getSiteAccess();
-  if (!access.canView) return <LockedSurprise unlockAt={unlockAtMs()} />;
-
   const supabaseReady = hasSupabaseEnv();
   const actionsReady = supabaseReady || isLocalAuthEnabled();
   let currentUserId: string | null = null;
