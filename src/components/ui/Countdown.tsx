@@ -53,14 +53,14 @@ export function Countdown({ target, onDone, compact = false }: { target: number;
           key={key}
           className={
             compact
-              ? "flex min-w-14 flex-col items-center rounded-2xl bg-white/70 px-2 py-2 shadow-cloud ring-1 ring-white/70"
-              : "flex min-w-16 flex-col items-center rounded-3xl bg-white/75 px-3 py-3 shadow-cloud ring-1 ring-white/70 backdrop-blur sm:min-w-20 sm:px-4 sm:py-4"
+              ? "home-days-card flex min-w-14 flex-col items-center rounded-2xl px-2 py-2 backdrop-blur"
+              : "home-days-card flex min-w-16 flex-col items-center rounded-3xl px-3 py-3 backdrop-blur sm:min-w-20 sm:px-4 sm:py-4"
           }
         >
-          <span className={compact ? "font-display text-2xl leading-none text-petal" : "font-display text-4xl leading-none text-petal sm:text-5xl"}>
+          <span className={compact ? "home-days-number font-display text-2xl leading-none text-petal" : "home-days-number font-display text-4xl leading-none text-petal sm:text-5xl"}>
             {String(parts[key]).padStart(2, "0")}
           </span>
-          <span className={compact ? "mt-1 text-[10px] font-semibold uppercase tracking-wide text-ink/55" : "mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-ink/55"}>
+          <span className={compact ? "home-days-label mt-1 text-[10px] font-semibold uppercase tracking-wide text-ink/55" : "home-days-label mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-ink/55"}>
             {label}
           </span>
         </div>
