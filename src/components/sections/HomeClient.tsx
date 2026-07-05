@@ -112,7 +112,7 @@ export function HomeClient({
         <motion.p className="font-script text-3xl text-petal" animate={secretTitleOpen ? { scale: [1, 1.08, 1] } : {}} transition={{ duration: 1.2, repeat: secretTitleOpen ? Infinity : 0 }}>
           там, где каждый день бережно хранит вас
         </motion.p>
-        <button type="button" className="mt-2 cursor-pointer font-display text-6xl leading-tight text-ink sm:text-7xl" onClick={() => setTitleClicks((value) => value + 1)}>
+        <button type="button" className="romantic-glow mt-2 cursor-pointer font-display text-6xl leading-tight text-ink sm:text-7xl" onClick={() => setTitleClicks((value) => value + 1)}>
           {title}
         </button>
 
@@ -130,11 +130,16 @@ export function HomeClient({
         </AnimatePresence>
 
         <div className="relative my-10 grid w-full max-w-3xl items-center gap-4 sm:grid-cols-[1fr_auto_1fr]">
+          {/* Thread joining the two names, passing softly behind the days card. */}
+          <div className="pointer-events-none absolute inset-x-6 top-1/2 z-0 hidden -translate-y-1/2 sm:block" aria-hidden>
+            <div className="love-thread h-px w-full bg-gradient-to-r from-transparent via-petal to-transparent" />
+          </div>
+
           {visibleProfiles.slice(0, 1).map((profile, index) => (
             <motion.button
               type="button"
               key={profile.id}
-              className="relative mx-auto"
+              className="relative z-10 mx-auto"
               animate={{ y: [0, -8, 0], x: [0, 6, 0] }}
               transition={{ duration: 5 + index, repeat: Infinity, ease: "easeInOut" }}
               onClick={() => setCloudClicks((value) => value + 1)}
@@ -144,7 +149,7 @@ export function HomeClient({
             </motion.button>
           ))}
 
-          <div className="home-days-card mx-auto rounded-3xl bg-white/75 px-6 py-4 text-sm font-semibold text-ink shadow-cloud ring-1 ring-white/70 backdrop-blur">
+          <div className="home-days-card relative z-10 mx-auto rounded-3xl bg-white/75 px-6 py-4 text-sm font-semibold text-ink shadow-cloud ring-1 ring-white/70 backdrop-blur">
             <span className="home-days-label">вы вместе</span>
             <div className="home-days-number font-display text-5xl leading-none text-petal">
               <Counter value={days} />
@@ -156,7 +161,7 @@ export function HomeClient({
             <motion.button
               type="button"
               key={profile.id}
-              className="relative mx-auto"
+              className="relative z-10 mx-auto"
               animate={{ y: [0, -8, 0], x: [0, -6, 0] }}
               transition={{ duration: 5.5 + index, repeat: Infinity, ease: "easeInOut" }}
               onClick={() => setCloudClicks((value) => value + 1)}
@@ -249,9 +254,9 @@ export function HomeClient({
         {visibleCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link key={card.href} href={card.href}>
-              <GlassCard className="min-h-48 transition hover:-translate-y-1 hover:bg-white/65">
-                <Icon className="mb-5 h-8 w-8 text-petal" aria-hidden />
+            <Link key={card.href} href={card.href} className="group">
+              <GlassCard className="romantic-card min-h-48 hover:bg-white/65">
+                <Icon className="mb-5 h-8 w-8 text-petal transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110" aria-hidden />
                 <h2 className="font-display text-2xl text-ink">{card.title}</h2>
                 <p className="mt-3 text-sm leading-6 text-ink/68">{card.text}</p>
               </GlassCard>
