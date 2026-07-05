@@ -19,7 +19,7 @@ export function Navbar({ unreadSecret = 0, canViewAll = false, isAdmin = false }
           const Icon = item.icon;
           const showBadge = item.href === "/secret" && unreadSecret > 0;
           return (
-            <Link key={item.href} href={item.href} className={cn("relative flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-ink/70 transition hover:text-ink lg:px-4", active && "text-ink")}>
+            <Link key={item.href} href={item.href} prefetch className={cn("relative flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-ink/70 transition hover:text-ink lg:px-4", active && "text-ink")}>
               {active ? <motion.span className="absolute inset-0 rounded-full bg-blush shadow-cloud" layoutId="desktop-active-nav" /> : null}
               <span className="relative inline-flex">
                 <Icon className="h-4 w-4" aria-hidden />

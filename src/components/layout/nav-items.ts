@@ -20,14 +20,15 @@ export const navItems: AppNavItem[] = [
 ];
 
 /**
- * Routes hidden from the nav before the 8 July reveal. Only "Наша история"
- * is a surprise section; every other page is a pre-existing feature that
- * stays fully visible and usable. The admin always sees everything.
+ * Routes hidden from the nav entirely. "Наша история" is intentionally NOT
+ * hidden — it stays visible as a teasing locked tab (countdown + "секретик"),
+ * while access to its content is gated on the page itself until 8 July.
+ * The list is kept for future use; currently empty so every tab is shown.
  */
-export const LOCKED_HREFS = ["/story"] as const;
+export const LOCKED_HREFS: string[] = [];
 
 /** The nav shown to a given viewer. */
 export function visibleNavItems(canViewAll: boolean): AppNavItem[] {
   if (canViewAll) return navItems;
-  return navItems.filter((item) => !LOCKED_HREFS.includes(item.href as (typeof LOCKED_HREFS)[number]));
+  return navItems.filter((item) => !LOCKED_HREFS.includes(item.href));
 }

@@ -19,7 +19,7 @@ export function BottomTabBar({ unreadSecret = 0, canViewAll = false, isAdmin = f
           const Icon = item.icon;
           const showBadge = item.href === "/secret" && unreadSecret > 0;
           return (
-            <Link key={item.href} href={item.href} className={cn("relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[9px] font-semibold text-ink/55", active && "text-ink")}>
+            <Link key={item.href} href={item.href} prefetch className={cn("relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[9px] font-semibold text-ink/55", active && "text-ink")}>
               {active ? <motion.span layoutId="mobile-active-nav" className="absolute inset-0 rounded-2xl bg-blush shadow-cloud" /> : null}
               <span className="relative inline-flex">
                 <Icon className="h-5 w-5" aria-hidden />

@@ -254,7 +254,7 @@ export function HomeClient({
         {visibleCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link key={card.href} href={card.href} className="group">
+            <Link key={card.href} href={card.href} prefetch className="group">
               <GlassCard className="romantic-card min-h-48 hover:bg-white/65">
                 <Icon className="mb-5 h-8 w-8 text-petal transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110" aria-hidden />
                 <h2 className="font-display text-2xl text-ink">{card.title}</h2>

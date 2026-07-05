@@ -25,7 +25,7 @@ export function LockedSurprise({ unlockAt }: { unlockAt: number }) {
           <Lock className="h-9 w-9" aria-hidden />
         </motion.span>
 
-        <p className="font-script text-3xl text-petal">тс-с-с... это сюрприз</p>
+        <p className="font-script text-3xl text-petal">тс-с-с... секретик</p>
         <h1 className="mt-2 text-balance font-display text-4xl leading-tight text-ink sm:text-5xl">
           Эта дверца откроется 8 июля
         </h1>
