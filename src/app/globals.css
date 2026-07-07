@@ -10,38 +10,47 @@
      Defaults below are the year-round pink/peach values; each season below
      overrides a subset. Consumed by the aurora glow, the dotted lattice and
      the floating hearts. To add a season: append a [data-season] block. */
-  --season-glow-warm: rgba(255, 224, 212, 0.5); /* aurora blob B */
-  --season-glow-cool: rgba(252, 198, 224, 0.55); /* aurora blob C */
-  --season-pattern: rgba(236, 95, 156, 0.16); /* dotted lattice */
+  --season-glow-a: rgba(255, 214, 236, 0.6); /* aurora blob A (usually pink) */
+  --season-glow-warm: rgba(255, 224, 212, 0.55); /* aurora blob B */
+  --season-glow-cool: rgba(252, 198, 224, 0.6); /* aurora blob C */
+  --season-pattern: rgba(236, 95, 156, 0.18); /* dotted lattice */
   --season-heart: #ec5f9c; /* floating hearts */
 }
 
 /* Весна (март–май): свежие зелёные акценты. */
 :root[data-season="spring"] {
-  --season-glow-warm: rgba(212, 241, 212, 0.55);
-  --season-glow-cool: rgba(255, 224, 240, 0.5);
-  --season-pattern: rgba(120, 190, 140, 0.18);
+  --season-glow-a: rgba(255, 200, 226, 0.55);
+  --season-glow-warm: rgba(150, 224, 150, 0.85);
+  --season-glow-cool: rgba(190, 235, 165, 0.8);
+  --season-pattern: rgba(90, 180, 110, 0.32);
+  --season-heart: #6bbf59;
 }
 
 /* Лето (июнь–август): тёплое золото и персик. */
 :root[data-season="summer"] {
-  --season-glow-warm: rgba(255, 217, 102, 0.5);
-  --season-glow-cool: rgba(255, 200, 170, 0.55);
-  --season-pattern: rgba(255, 176, 84, 0.18);
+  --season-glow-a: rgba(255, 190, 150, 0.7);
+  --season-glow-warm: rgba(255, 205, 70, 0.9);
+  --season-glow-cool: rgba(255, 165, 120, 0.85);
+  --season-pattern: rgba(255, 150, 50, 0.34);
+  --season-heart: #ff8a3d;
 }
 
 /* Осень (сентябрь–ноябрь): терракота и тёплый оранжевый. */
 :root[data-season="autumn"] {
-  --season-glow-warm: rgba(232, 113, 77, 0.45);
-  --season-glow-cool: rgba(255, 170, 110, 0.5);
-  --season-pattern: rgba(200, 90, 50, 0.18);
+  --season-glow-a: rgba(230, 130, 80, 0.7);
+  --season-glow-warm: rgba(220, 90, 50, 0.85);
+  --season-glow-cool: rgba(240, 150, 70, 0.85);
+  --season-pattern: rgba(190, 75, 40, 0.34);
+  --season-heart: #d85a2c;
 }
 
 /* Зима (декабрь–февраль): прохладная сирень и фиолетовые блики. */
 :root[data-season="winter"] {
-  --season-glow-warm: rgba(190, 150, 235, 0.45);
-  --season-glow-cool: rgba(226, 212, 240, 0.55);
-  --season-pattern: rgba(150, 110, 200, 0.18);
+  --season-glow-a: rgba(200, 200, 245, 0.65);
+  --season-glow-warm: rgba(160, 120, 230, 0.8);
+  --season-glow-cool: rgba(200, 190, 245, 0.85);
+  --season-pattern: rgba(130, 95, 200, 0.32);
+  --season-heart: #8f6be0;
 }
 
 :root[data-theme="night"] {
@@ -262,13 +271,13 @@ body::after {
   inset: -20%;
   z-index: -2;
   pointer-events: none;
-  /* Blob A stays pink (brand); blobs B and C shift with the season. */
+  /* All three aurora blobs shift with the season for a clearly visible mood. */
   background:
-    radial-gradient(38rem 30rem at 22% 18%, rgba(255, 214, 236, 0.55), transparent 70%),
+    radial-gradient(38rem 30rem at 22% 18%, var(--season-glow-a), transparent 70%),
     radial-gradient(34rem 28rem at 82% 30%, var(--season-glow-warm), transparent 70%),
     radial-gradient(40rem 32rem at 60% 92%, var(--season-glow-cool), transparent 72%);
   background-size: 200% 200%;
-  filter: blur(6px);
+  filter: blur(4px) saturate(1.15);
   animation: aurora-drift 26s ease-in-out infinite;
 }
 
@@ -280,9 +289,9 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(var(--season-pattern) 1.4px, transparent 1.5px);
-  background-size: 28px 28px;
-  opacity: 0.5;
+  background-image: radial-gradient(var(--season-pattern) 1.8px, transparent 2px);
+  background-size: 26px 26px;
+  opacity: 0.75;
   -webkit-mask-image: radial-gradient(ellipse at 50% 24%, black, transparent 78%);
   mask-image: radial-gradient(ellipse at 50% 24%, black, transparent 78%);
 }
