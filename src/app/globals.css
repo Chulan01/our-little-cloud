@@ -10,11 +10,42 @@
      Defaults below are the year-round pink/peach values; each season below
      overrides a subset. Consumed by the aurora glow, the dotted lattice and
      the floating hearts. To add a season: append a [data-season] block. */
-  --season-glow-a: rgba(255, 214, 236, 0.6); /* aurora blob A (usually pink) */
-  --season-glow-warm: rgba(255, 224, 212, 0.55); /* aurora blob B */
-  --season-glow-cool: rgba(252, 198, 224, 0.6); /* aurora blob C */
-  --season-pattern: rgba(236, 95, 156, 0.18); /* dotted lattice */
-  --season-heart: #ec5f9c; /* floating hearts */
+  --season-glow-a: rgba(255, 214, 236, 0.55); /* aurora blob A */
+  --season-glow-warm: rgba(255, 224, 212, 0.5); /* aurora blob B */
+  --season-glow-cool: rgba(252, 198, 224, 0.55); /* aurora blob C */
+  --season-pattern: rgba(236, 95, 156, 0.16); /* dotted lattice */
+}
+
+/* Весна (март–май): едва уловимый зелёный оттенок. */
+:root[data-season="spring"] {
+  --season-glow-a: rgba(255, 214, 236, 0.55);
+  --season-glow-warm: rgba(230, 245, 220, 0.48);
+  --season-glow-cool: rgba(235, 250, 220, 0.52);
+  --season-pattern: rgba(150, 180, 140, 0.18);
+}
+
+/* Лето (июнь–август): мягкое тепло золота и персика. */
+:root[data-season="summer"] {
+  --season-glow-a: rgba(255, 235, 210, 0.56);
+  --season-glow-warm: rgba(255, 235, 150, 0.52);
+  --season-glow-cool: rgba(255, 220, 180, 0.54);
+  --season-pattern: rgba(240, 160, 100, 0.18);
+}
+
+/* Осень (сентябрь–ноябрь): едва заметные терракотовые тона. */
+:root[data-season="autumn"] {
+  --season-glow-a: rgba(255, 214, 236, 0.55);
+  --season-glow-warm: rgba(245, 190, 140, 0.49);
+  --season-glow-cool: rgba(255, 210, 170, 0.53);
+  --season-pattern: rgba(180, 110, 80, 0.18);
+}
+
+/* Зима (декабрь–февраль): нежный сиреневый оттенок. */
+:root[data-season="winter"] {
+  --season-glow-a: rgba(240, 230, 250, 0.55);
+  --season-glow-warm: rgba(225, 200, 245, 0.5);
+  --season-glow-cool: rgba(240, 220, 250, 0.55);
+  --season-pattern: rgba(180, 140, 200, 0.18);
 }
 
 /* Весна (март–май): свежие зелёные акценты. */
@@ -277,7 +308,7 @@ body::after {
     radial-gradient(34rem 28rem at 82% 30%, var(--season-glow-warm), transparent 70%),
     radial-gradient(40rem 32rem at 60% 92%, var(--season-glow-cool), transparent 72%);
   background-size: 200% 200%;
-  filter: blur(4px) saturate(1.15);
+  filter: blur(6px);
   animation: aurora-drift 26s ease-in-out infinite;
 }
 
@@ -289,9 +320,9 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(var(--season-pattern) 1.8px, transparent 2px);
-  background-size: 26px 26px;
-  opacity: 0.75;
+  background-image: radial-gradient(var(--season-pattern) 1.4px, transparent 1.5px);
+  background-size: 28px 28px;
+  opacity: 0.5;
   -webkit-mask-image: radial-gradient(ellipse at 50% 24%, black, transparent 78%);
   mask-image: radial-gradient(ellipse at 50% 24%, black, transparent 78%);
 }
@@ -306,11 +337,9 @@ body::before {
   }
 }
 
-/* At night the aurora keeps its seasonal hues but blooms a little brighter
-   so it reads against the deep plum background. Blob A stays pink. */
+/* At night the aurora becomes more visible. */
 :root[data-theme="night"] body::after {
-  filter: blur(6px) brightness(1.25) saturate(1.15);
-  opacity: 0.9;
+  filter: blur(6px) brightness(1.1);
 }
 
 /* The dotted lattice keeps its seasonal colour at night, just lifted in
