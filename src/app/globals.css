@@ -48,42 +48,6 @@
   --season-pattern: rgba(180, 140, 200, 0.18);
 }
 
-/* Весна (март–май): свежие зелёные акценты. */
-:root[data-season="spring"] {
-  --season-glow-a: rgba(255, 200, 226, 0.55);
-  --season-glow-warm: rgba(150, 224, 150, 0.85);
-  --season-glow-cool: rgba(190, 235, 165, 0.8);
-  --season-pattern: rgba(90, 180, 110, 0.32);
-  --season-heart: #6bbf59;
-}
-
-/* Лето (июнь–август): тёплое золото и персик. */
-:root[data-season="summer"] {
-  --season-glow-a: rgba(255, 190, 150, 0.7);
-  --season-glow-warm: rgba(255, 205, 70, 0.9);
-  --season-glow-cool: rgba(255, 165, 120, 0.85);
-  --season-pattern: rgba(255, 150, 50, 0.34);
-  --season-heart: #ff8a3d;
-}
-
-/* Осень (сентябрь–ноябрь): терракота и тёплый оранжевый. */
-:root[data-season="autumn"] {
-  --season-glow-a: rgba(230, 130, 80, 0.7);
-  --season-glow-warm: rgba(220, 90, 50, 0.85);
-  --season-glow-cool: rgba(240, 150, 70, 0.85);
-  --season-pattern: rgba(190, 75, 40, 0.34);
-  --season-heart: #d85a2c;
-}
-
-/* Зима (декабрь–февраль): прохладная сирень и фиолетовые блики. */
-:root[data-season="winter"] {
-  --season-glow-a: rgba(200, 200, 245, 0.65);
-  --season-glow-warm: rgba(160, 120, 230, 0.8);
-  --season-glow-cool: rgba(200, 190, 245, 0.85);
-  --season-pattern: rgba(130, 95, 200, 0.32);
-  --season-heart: #8f6be0;
-}
-
 :root[data-theme="night"] {
   color-scheme: dark;
 }
