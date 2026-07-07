@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { ToastContainer } from "@/components/ui/ToastContainer";
 import { getUnreadMessageCount } from "@/lib/actions/messages";
 import { getSiteAccess } from "@/lib/auth/admin";
+import { getCurrentSeason } from "@/lib/season";
 import "./globals.css";
 
 const playfair = Playfair_Display({ subsets: ["cyrillic", "latin"], variable: "--font-playfair", display: "swap" });
@@ -25,8 +26,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // Fetched on every server render (the layout is revalidated on
   // sendMessage / markAsRead via `revalidatePath("/", "layout")`).
   const [unreadSecret, access] = await Promise.all([getUnreadMessageCount(), getSiteAccess()]);
+  // Seasonal accent theming is decided server-side from the current date so
+  // there's no flash of the wrong palette on load. The base pink brand stays
+  // the same all year; only accents shift (see globals.css [data-season]).
+  const season = getCurrentSeason();
   return (
-    <html lang="ru" className={`${playfair.variable} ${inter.variable} ${caveat.variable}`}>
+    <html lang="ru" data-season={season} className={`${playfair.variable} ${inter.variable} ${caveat.variable}`}>
       <body className="font-sans">
         <FloatingAmbience />
         <ThemeToggle />

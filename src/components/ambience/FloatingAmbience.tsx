@@ -54,7 +54,7 @@ export function FloatingAmbience() {
           style={{
             left: heart.left,
             top: heart.top,
-            color: "#ec5f9c",
+            color: "var(--season-heart, #ec5f9c)",
             fontSize: heart.size,
             opacity: heart.opacity,
             textShadow: "0 8px 22px rgba(236, 95, 156, 0.45), 0 0 2px rgba(255, 255, 255, 0.9)"

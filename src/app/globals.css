@@ -4,6 +4,44 @@
 
 :root {
   color-scheme: light;
+
+  /* ---- Seasonal accent tokens -------------------------------------------
+     Only ACCENTS change with the season — the signature pink base stays put.
+     Defaults below are the year-round pink/peach values; each season below
+     overrides a subset. Consumed by the aurora glow, the dotted lattice and
+     the floating hearts. To add a season: append a [data-season] block. */
+  --season-glow-warm: rgba(255, 224, 212, 0.5); /* aurora blob B */
+  --season-glow-cool: rgba(252, 198, 224, 0.55); /* aurora blob C */
+  --season-pattern: rgba(236, 95, 156, 0.16); /* dotted lattice */
+  --season-heart: #ec5f9c; /* floating hearts */
+}
+
+/* Весна (март–май): свежие зелёные акценты. */
+:root[data-season="spring"] {
+  --season-glow-warm: rgba(212, 241, 212, 0.55);
+  --season-glow-cool: rgba(255, 224, 240, 0.5);
+  --season-pattern: rgba(120, 190, 140, 0.18);
+}
+
+/* Лето (июнь–август): тёплое золото и персик. */
+:root[data-season="summer"] {
+  --season-glow-warm: rgba(255, 217, 102, 0.5);
+  --season-glow-cool: rgba(255, 200, 170, 0.55);
+  --season-pattern: rgba(255, 176, 84, 0.18);
+}
+
+/* Осень (сентябрь–ноябрь): терракота и тёплый оранжевый. */
+:root[data-season="autumn"] {
+  --season-glow-warm: rgba(232, 113, 77, 0.45);
+  --season-glow-cool: rgba(255, 170, 110, 0.5);
+  --season-pattern: rgba(200, 90, 50, 0.18);
+}
+
+/* Зима (декабрь–февраль): прохладная сирень и фиолетовые блики. */
+:root[data-season="winter"] {
+  --season-glow-warm: rgba(190, 150, 235, 0.45);
+  --season-glow-cool: rgba(226, 212, 240, 0.55);
+  --season-pattern: rgba(150, 110, 200, 0.18);
 }
 
 :root[data-theme="night"] {
@@ -224,10 +262,11 @@ body::after {
   inset: -20%;
   z-index: -2;
   pointer-events: none;
+  /* Blob A stays pink (brand); blobs B and C shift with the season. */
   background:
     radial-gradient(38rem 30rem at 22% 18%, rgba(255, 214, 236, 0.55), transparent 70%),
-    radial-gradient(34rem 28rem at 82% 30%, rgba(255, 224, 212, 0.5), transparent 70%),
-    radial-gradient(40rem 32rem at 60% 92%, rgba(252, 198, 224, 0.55), transparent 72%);
+    radial-gradient(34rem 28rem at 82% 30%, var(--season-glow-warm), transparent 70%),
+    radial-gradient(40rem 32rem at 60% 92%, var(--season-glow-cool), transparent 72%);
   background-size: 200% 200%;
   filter: blur(6px);
   animation: aurora-drift 26s ease-in-out infinite;
@@ -241,7 +280,7 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(rgba(236, 95, 156, 0.16) 1.4px, transparent 1.5px);
+  background-image: radial-gradient(var(--season-pattern) 1.4px, transparent 1.5px);
   background-size: 28px 28px;
   opacity: 0.5;
   -webkit-mask-image: radial-gradient(ellipse at 50% 24%, black, transparent 78%);
@@ -258,16 +297,17 @@ body::before {
   }
 }
 
+/* At night the aurora keeps its seasonal hues but blooms a little brighter
+   so it reads against the deep plum background. Blob A stays pink. */
 :root[data-theme="night"] body::after {
-  background:
-    radial-gradient(38rem 30rem at 22% 18%, rgba(236, 95, 156, 0.32), transparent 70%),
-    radial-gradient(34rem 28rem at 82% 30%, rgba(177, 135, 255, 0.3), transparent 70%),
-    radial-gradient(40rem 32rem at 60% 92%, rgba(255, 156, 204, 0.3), transparent 72%);
+  filter: blur(6px) brightness(1.25) saturate(1.15);
+  opacity: 0.9;
 }
 
+/* The dotted lattice keeps its seasonal colour at night, just lifted in
+   opacity so the faint dots stay visible on the dark background. */
 :root[data-theme="night"] body::before {
-  background-image: radial-gradient(rgba(255, 210, 235, 0.14) 1.4px, transparent 1.5px);
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 /* Soft glow on serif display headings — like candlelight on the letters. */
