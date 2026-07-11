@@ -16,5 +16,21 @@ export const updateStoryEventSchema = createStoryEventSchema.extend({
 
 export const storyEventIdSchema = z.object({ id: z.string().min(1) });
 
+export const reactionPersonSchema = z.enum(["maxim", "vika"]);
+export const heartKindSchema = z.enum(["tender", "spark", "pulse", "forever"]);
+
+export const setStoryReactionSchema = z.object({
+  eventId: z.string().min(1),
+  person: reactionPersonSchema,
+  heart: heartKindSchema
+});
+
+export const clearStoryReactionSchema = z.object({
+  eventId: z.string().min(1),
+  person: reactionPersonSchema
+});
+
 export type CreateStoryEventInput = z.infer<typeof createStoryEventSchema>;
 export type UpdateStoryEventInput = z.infer<typeof updateStoryEventSchema>;
+export type SetStoryReactionInput = z.infer<typeof setStoryReactionSchema>;
+export type ClearStoryReactionInput = z.infer<typeof clearStoryReactionSchema>;

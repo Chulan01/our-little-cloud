@@ -4,18 +4,30 @@ import { revalidatePath } from "next/cache";
 import { isAdmin } from "@/lib/auth/admin";
 import { requireCouple } from "@/lib/auth/guard";
 import { hasSupabaseEnv, isLocalStoreDisabled } from "@/lib/env";
-import { localCreateStoryEvent, localDeleteStoryEvent, localListStoryEvents, localUpdateStoryEvent } from "@/lib/local-store";
+import {
+  localClearStoryReaction,
+  localCreateStoryEvent,
+  localDeleteStoryEvent,
+  localListStoryEvents,
+  localListStoryReactions,
+  localSetStoryReaction,
+  localUpdateStoryEvent
+} from "@/lib/local-store";
 import { createClient } from "@/lib/supabase/server";
 import { getSignedUrl } from "@/lib/utils/storage";
 import {
+  clearStoryReactionSchema,
   createStoryEventSchema,
+  setStoryReactionSchema,
   storyEventIdSchema,
   updateStoryEventSchema,
+  type ClearStoryReactionInput,
   type CreateStoryEventInput,
+  type SetStoryReactionInput,
   type UpdateStoryEventInput
 } from "@/lib/validations/story";
 import { fail, logServerError, ok, validationError, type Result } from "@/lib/utils/errors";
-import type { StoryEvent, StoryEventWithPhoto } from "@/types/domain";
+import type { StoryEvent, StoryEventWithPhoto, StoryReaction } from "@/types/domain";
 
 async function resolvePhotoSrc(event: StoryEvent): Promise<string | null> {
   if (event.storage_path) {
@@ -158,4 +170,85 @@ export async function deleteStoryEvent(input: { id: string }): Promise<Result<{ 
 
   revalidatePath("/story");
   return ok({ id: parsed.data.id });
+}
+
+/** Lists every heart reaction for the couple's timeline. Couple members only. */
+export async function listStoryReactions(): Promise<Result<StoryReaction[]>> {
+  if (!hasSupabaseEnv()) {
+    if (isLocalStoreDisabled()) return ok([]);
+    return ok(await localListStoryReactions());
+  }
+
+  const { coupleId } = await requireCouple();
+  const supabase = createClient();
+  const { data, error } = await supabase.from("story_reactions").select("*").eq("couple_id", coupleId);
+
+  if (error) {
+    logServerError("listStoryReactions", error);
+    return fail("SERVER", "Не получилось загрузить реакции.");
+  }
+
+  return ok((data ?? []) as StoryReaction[]);
+}
+
+/** Sets (or replaces) one partner's heart reaction on an event. Couple members. */
+export async function setStoryReaction(input: SetStoryReactionInput): Promise<Result<StoryReaction>> {
+  const parsed = setStoryReactionSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
+  if (!hasSupabaseEnv()) {
+    if (isLocalStoreDisabled()) return fail("SERVER", "Хранилище не настроено на этом сервере. Подключите Supabase.");
+    const reaction = await localSetStoryReaction(parsed.data);
+    revalidatePath("/story");
+    return ok(reaction);
+  }
+
+  const { coupleId } = await requireCouple();
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("story_reactions")
+    .upsert(
+      { couple_id: coupleId, event_id: parsed.data.eventId, person: parsed.data.person, heart: parsed.data.heart },
+      { onConflict: "event_id,person" }
+    )
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    logServerError("setStoryReaction", error);
+    return fail("SERVER", "Не получилось сохранить реакцию.");
+  }
+
+  revalidatePath("/story");
+  return ok(data as StoryReaction);
+}
+
+/** Removes one partner's reaction from an event (toggle off). Couple members. */
+export async function clearStoryReaction(input: ClearStoryReactionInput): Promise<Result<{ eventId: string }>> {
+  const parsed = clearStoryReactionSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
+  if (!hasSupabaseEnv()) {
+    if (isLocalStoreDisabled()) return fail("SERVER", "Хранилище не настроено на этом сервере. Подключите Supabase.");
+    await localClearStoryReaction(parsed.data);
+    revalidatePath("/story");
+    return ok({ eventId: parsed.data.eventId });
+  }
+
+  const { coupleId } = await requireCouple();
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("story_reactions")
+    .delete()
+    .eq("couple_id", coupleId)
+    .eq("event_id", parsed.data.eventId)
+    .eq("person", parsed.data.person);
+
+  if (error) {
+    logServerError("clearStoryReaction", error);
+    return fail("SERVER", "Не получилось убрать реакцию.");
+  }
+
+  revalidatePath("/story");
+  return ok({ eventId: parsed.data.eventId });
 }

@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { LOCAL_AUTH_COOKIE, getLocalProfiles, localUserId } from "@/lib/local-auth";
 import { getSeedReasons } from "@/lib/reasons";
 import { anniversaryStart, relationshipStartDate } from "@/lib/timezone";
-import type { Couple, DateSpot, LoveCounter, LoveReason, Memory, Profile, SecretMessage, StoryEvent, TimeCapsule } from "@/types/domain";
+import type { Couple, DateSpot, HeartKind, LoveCounter, LoveReason, Memory, Profile, ReactionPerson, SecretMessage, StoryEvent, StoryReaction, TimeCapsule } from "@/types/domain";
 import type { MemoryWithPhotos } from "@/lib/actions/memories";
 import type { CapsuleWithPhotos } from "@/lib/actions/capsules";
 
@@ -17,6 +17,7 @@ type LocalData = {
   hugs: LocalHugSignal[];
   spots: DateSpot[];
   storyEvents: StoryEvent[];
+  storyReactions: StoryReaction[];
 };
 
 export type LocalHugSignal = {
@@ -33,7 +34,7 @@ const DATA_PATH = path.join(process.cwd(), "work", "local-data.json");
 const now = () => new Date().toISOString();
 
 function emptyData(): LocalData {
-  return { memories: [], reasons: [], capsules: [], counters: [], messages: [], hugs: [], spots: [], storyEvents: [] };
+  return { memories: [], reasons: [], capsules: [], counters: [], messages: [], hugs: [], spots: [], storyEvents: [], storyReactions: [] };
 }
 
 async function readData(): Promise<LocalData> {
@@ -467,6 +468,44 @@ export async function localUpdateStoryEvent(input: {
 export async function localDeleteStoryEvent(id: string): Promise<void> {
   const data = await readData();
   data.storyEvents = data.storyEvents.filter((event) => event.id !== id);
+  data.storyReactions = data.storyReactions.filter((reaction) => reaction.event_id !== id);
+  await writeData(data);
+}
+
+export async function localListStoryReactions(): Promise<StoryReaction[]> {
+  const data = await readData();
+  return [...data.storyReactions];
+}
+
+/** Upserts one person's reaction for an event (one reaction per person). */
+export async function localSetStoryReaction(input: { eventId: string; person: ReactionPerson; heart: HeartKind }): Promise<StoryReaction> {
+  const data = await readData();
+  const existing = data.storyReactions.find((reaction) => reaction.event_id === input.eventId && reaction.person === input.person);
+  if (existing) {
+    existing.heart = input.heart;
+    existing.updated_at = now();
+    await writeData(data);
+    return existing;
+  }
+  const reaction: StoryReaction = {
+    id: crypto.randomUUID(),
+    couple_id: "local-couple",
+    event_id: input.eventId,
+    person: input.person,
+    heart: input.heart,
+    created_at: now(),
+    updated_at: now()
+  };
+  data.storyReactions.push(reaction);
+  await writeData(data);
+  return reaction;
+}
+
+export async function localClearStoryReaction(input: { eventId: string; person: ReactionPerson }): Promise<void> {
+  const data = await readData();
+  data.storyReactions = data.storyReactions.filter(
+    (reaction) => !(reaction.event_id === input.eventId && reaction.person === input.person)
+  );
   await writeData(data);
 }
 

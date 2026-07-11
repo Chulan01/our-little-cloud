@@ -4,14 +4,23 @@ import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 import { GlassCard } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { StoryReactions } from "@/components/sections/StoryReactions";
 import { formatDate } from "@/lib/utils";
-import type { StoryEventWithPhoto } from "@/types/domain";
+import type { EventReactions, StoryEventWithPhoto } from "@/types/domain";
+
+const EMPTY_REACTIONS: EventReactions = { maxim: null, vika: null };
 
 /**
  * Vertical timeline of the couple's first month: a soft spine on the left
  * with a cloud-node per event and a gentle reveal as you scroll.
  */
-export function StoryClient({ events }: { events: StoryEventWithPhoto[] }) {
+export function StoryClient({
+  events,
+  reactions = {}
+}: {
+  events: StoryEventWithPhoto[];
+  reactions?: Record<string, EventReactions>;
+}) {
   if (events.length === 0) {
     return (
       <EmptyState
@@ -52,6 +61,7 @@ export function StoryClient({ events }: { events: StoryEventWithPhoto[] }) {
                 <img src={event.photoSrc} alt={event.title} className="mt-3 max-h-64 w-full rounded-2xl object-cover" />
               ) : null}
               <p className="mt-3 whitespace-pre-line text-sm leading-6 text-ink/72">{event.body}</p>
+              <StoryReactions eventId={event.id} initial={reactions[event.id] ?? EMPTY_REACTIONS} />
             </GlassCard>
           </motion.li>
         ))}

@@ -55,6 +55,33 @@ export type StoryEventWithPhoto = StoryEvent & {
   photoSrc: string | null;
 };
 
+/** Which partner a reaction belongs to (drives left/right placement). */
+export type ReactionPerson = "maxim" | "vika";
+
+/** Available heart reaction kinds. Keep in sync with HEART_KINDS in the UI. */
+export type HeartKind = "tender" | "spark" | "pulse" | "forever";
+
+/**
+ * A single heart reaction left under a timeline entry. Hand-defined (not from
+ * `database.types`) because the table was added after the last typegen run —
+ * keep in sync with `supabase/migrations/0012_story_reactions.sql`.
+ */
+export type StoryReaction = {
+  id: string;
+  couple_id: string;
+  event_id: string;
+  person: ReactionPerson;
+  heart: HeartKind;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Reactions for one event, split by partner (either may be null). */
+export type EventReactions = {
+  maxim: HeartKind | null;
+  vika: HeartKind | null;
+};
+
 export type NavItem = {
   href: string;
   label: string;
