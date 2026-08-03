@@ -58,12 +58,14 @@ export async function signInWithPassword(input: SignInInput): Promise<Result<{ e
 
   if (error || !data.user) {
     logServerError("signInWithPassword", error);
-    // Most common failure modes at this stage:
-    //   - "Invalid login credentials"         → wrong email or password
-    //   - "Email not confirmed"               → admin must set email_confirmed_at
-    //                                            in Supabase → Users (lock-down flow).
-    //   - "Email logins are disabled"         → Auth → Providers → Email checkbox off.
-    return fail("UNAUTHORIZED", "Не получилось войти. Проверь email и пароль или подтверди почту в Supabase.");
+    // Show the real Supabase error so the login form is self-diagnosing.
+    // Common messages:
+    //   - "Invalid login credentials"  → wrong email or password for THIS project
+    //   - "Email not confirmed"        → admin must set email_confirmed_at
+    //                                    in Supabase → Authentication → Users
+    //   - "Email logins are disabled"  → Auth → Providers → Email checkbox off
+    const detail = error?.message ?? "неизвестная ошибка";
+    return fail("UNAUTHORIZED", `Не получилось войти: ${detail}. Проверь email и пароль или подтверди почту в Supabase.`);
   }
 
   return ok({ email: data.user.email ?? parsed.data.email });
