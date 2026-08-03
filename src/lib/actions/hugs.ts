@@ -132,7 +132,16 @@ function normalizeGender(value: string | null): "male" | "female" | "unspecified
   return "unspecified";
 }
 
-/** Loads the current hug state for the signed-in user. */
+/**
+ * Loads the current hug state for the signed-in user.
+ *
+ * Deliberately does NOT use `requireCouple()`: HugWidget polls this action
+ * from the root layout on *every* page — including /login and /onboarding —
+ * so a guest or an unbound user must get an empty state back, never a
+ * `redirect()`. A redirect here would bounce the router into an endless
+ * reload loop (the widget re-mounts on every navigation and the 8s poll
+ * keeps re-firing). Mirrors the guest-safe pattern of `getUnreadMessageCount`.
+ */
 export async function getHugState(): Promise<Result<HugState>> {
   if (useLocalStore()) {
     return ok(await localGetHugState());
@@ -142,8 +151,19 @@ export async function getHugState(): Promise<Result<HugState>> {
   }
 
   const supabase = createClient();
-  const { user, coupleId } = await requireCouple();
-  return ok(await buildSupabaseHugState(supabase, coupleId, user.id));
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return ok(EMPTY_STATE);
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("couple_id")
+    .eq("id", userData.user.id)
+    .single();
+  if (!profile?.couple_id) {
+    return ok({ ...EMPTY_STATE, currentUserId: userData.user.id });
+  }
+
+  return ok(await buildSupabaseHugState(supabase, profile.couple_id, userData.user.id));
 }
 
 /** Creates a fresh "Я скучаю" signal from the current user to the partner. */
