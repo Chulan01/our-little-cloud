@@ -3,6 +3,22 @@ export function hasSupabaseEnv(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
+/**
+ * supabase-js throws `Invalid path specified in request URL` when the base
+ * URL contains anything but the bare origin — e.g. a pasted dashboard URL
+ * (`…/project/xyz`), the REST path (`…/rest/v1`) or the auth path
+ * (`…/auth/v1`). Normalise to the origin so a sloppy env var can't break
+ * auth/data requests at runtime.
+ */
+export function normalizeSupabaseUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return raw;
+  }
+}
+
 /** True when running on Vercel serverless functions (fs is read-only). */
 export function isVercelDeployment(): boolean {
   return process.env.VERCEL === "1";

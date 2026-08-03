@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { normalizeSupabaseUrl } from "@/lib/env";
 import type { Database } from "@/types/database.types";
 import type { LocalGenericSchema } from "@/types/supabase-generic";
 
@@ -9,7 +10,7 @@ export function createClient() {
   const cookieStore = cookies();
 
   return createServerClient<Database, "public", PublicSchema>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    normalizeSupabaseUrl(),
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
     {
       cookies: {
